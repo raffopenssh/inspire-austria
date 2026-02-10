@@ -105,12 +105,11 @@ h1 {
     display: flex;
     gap: 0.75rem;
     max-width: 600px;
-    margin: 0 auto 1.5rem;
-    flex-wrap: wrap;
+    margin: 0 auto 2rem;
     justify-content: center;
 }
 
-.filters select, .filter-btn {
+.filter-btn {
     padding: 0.4rem 0.75rem;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -119,56 +118,12 @@ h1 {
     font-family: inherit;
     font-size: 0.8rem;
     cursor: pointer;
-}
-
-.filter-btn {
     transition: all 0.15s;
 }
 
 .filter-btn:hover, .filter-btn.active {
     border-color: var(--warning);
     color: var(--warning);
-}
-
-/* Topics Bar */
-.topics-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    justify-content: center;
-    margin-bottom: 2rem;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.topic-tag {
-    padding: 0.3rem 0.6rem;
-    background: var(--tag-bg);
-    border: 1px solid transparent;
-    border-radius: 3px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.topic-tag:hover {
-    border-color: var(--accent);
-}
-
-.topic-tag.active {
-    background: var(--accent);
-    color: white;
-}
-
-.topic-tag .count {
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    margin-left: 0.2rem;
-}
-
-.topic-tag.active .count {
-    color: rgba(255,255,255,0.7);
 }
 
 /* Gems Section */
@@ -189,7 +144,7 @@ h1 {
 
 .gems-list {
     position: relative;
-    min-height: 80px;
+    min-height: 70px;
 }
 
 .gem-card {
@@ -202,16 +157,14 @@ h1 {
     border-radius: 4px;
     padding: 1rem;
     cursor: pointer;
-    transition: opacity 0.4s ease, transform 0.2s;
+    transition: opacity 0.5s ease;
     opacity: 0;
+    pointer-events: none;
 }
 
 .gem-card.active {
     opacity: 1;
-}
-
-.gem-card:hover {
-    transform: translateY(-2px);
+    pointer-events: auto;
 }
 
 .gem-card .title {

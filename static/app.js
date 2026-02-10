@@ -42,11 +42,6 @@ const topicLabels = {
 };
 
 async function init() {
-    // Load topics
-    const topicsRes = await fetch('/api/topics');
-    const topicsData = await topicsRes.json();
-    renderTopics(topicsData.topics);
-    
     // Load random gems
     await loadGems();
     
@@ -55,22 +50,6 @@ async function init() {
         if (e.key === 'Enter') search();
     });
     document.getElementById('search-btn').addEventListener('click', search);
-    
-    document.getElementById('filter-type').addEventListener('change', e => {
-        state.filters.type = e.target.value;
-        state.offset = 0;
-        search();
-    });
-    document.getElementById('filter-province').addEventListener('change', e => {
-        state.filters.province = e.target.value;
-        state.offset = 0;
-        search();
-    });
-    document.getElementById('filter-service').addEventListener('change', e => {
-        state.filters.service = e.target.value;
-        state.offset = 0;
-        search();
-    });
     
     document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
     document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
@@ -90,40 +69,6 @@ async function init() {
         document.getElementById('search-input').value = params.get('q');
         search();
     }
-}
-
-function renderTopics(topics) {
-    const container = document.getElementById('topics-bar');
-    const sortedTopics = topics
-        .filter(t => topicLabels[t.topic])
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 15);
-    
-    container.innerHTML = sortedTopics.map(t => `
-        <span class="topic-tag" data-topic="${t.topic}">
-            ${topicLabels[t.topic] || t.topic}
-            <span class="count">${t.count}</span>
-        </span>
-    `).join('');
-    
-    container.querySelectorAll('.topic-tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-            const topic = tag.dataset.topic;
-            
-            // Toggle active state
-            document.querySelectorAll('.topic-tag').forEach(t => t.classList.remove('active'));
-            
-            if (state.filters.topic === topic) {
-                state.filters.topic = '';
-            } else {
-                state.filters.topic = topic;
-                tag.classList.add('active');
-            }
-            
-            state.offset = 0;
-            search();
-        });
-    });
 }
 
 let currentGemIndex = 0;
@@ -650,9 +595,6 @@ async function smartSearch() {
 
 function searchByConcept(conceptId) {
     state.filters.topic = conceptId;
-    document.querySelectorAll('.topic-tag').forEach(t => {
-        t.classList.toggle('active', t.dataset.topic === conceptId);
-    });
     state.offset = 0;
     search();
 }
