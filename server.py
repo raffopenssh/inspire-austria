@@ -524,10 +524,12 @@ class InspireHandler(BaseHTTPRequestHandler):
         cur.execute('''
             SELECT c.id, c.name_de, c.name_en, c.regional_names,
                    COUNT(DISTINCT dc.dataset_id) as dataset_count,
-                   COUNT(DISTINCT d.province) as province_count
+                   COUNT(DISTINCT d.province) as province_count,
+                   COUNT(DISTINCT CASE WHEN s.service_type = 'WFS' THEN d.id END) as wfs_count
             FROM concepts c
             LEFT JOIN dataset_concepts dc ON c.id = dc.concept_id
             LEFT JOIN datasets d ON dc.dataset_id = d.id
+            LEFT JOIN dataset_services s ON d.id = s.dataset_id
             GROUP BY c.id
             ORDER BY dataset_count DESC
         ''')
@@ -539,8 +541,9 @@ class InspireHandler(BaseHTTPRequestHandler):
                 'name_de': row[1],
                 'name_en': row[2],
                 'regional_names': json.loads(row[3]) if row[3] else {},
-                'dataset_count': row[4],
-                'province_count': row[5]
+                'datasets': row[4],
+                'provinces': row[5],
+                'wfs_count': row[6]
             })
         
         conn.close()

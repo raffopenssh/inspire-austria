@@ -65,7 +65,11 @@ async function init() {
     
     // Check URL params
     const params = new URLSearchParams(window.location.search);
-    if (params.get('q')) {
+    if (params.get('dataset')) {
+        showDetail(params.get('dataset'));
+    } else if (params.get('concept')) {
+        showCombinationPanel(params.get('concept'));
+    } else if (params.get('q')) {
         document.getElementById('search-input').value = params.get('q');
         search();
     }
@@ -75,39 +79,98 @@ let currentGemIndex = 0;
 let gemsData = [];
 
 async function loadGems() {
-    const res = await fetch('/api/gems?random=true&limit=8');
-    const data = await res.json();
-    gemsData = data.gems;
+    // Load both top combinable concepts and individual gems
+    const [gemsRes, conceptsRes] = await Promise.all([
+        fetch('/api/gems?random=true&limit=10'),
+        fetch('/api/concepts')
+    ]);
+    const gemsResult = await gemsRes.json();
+    const conceptsResult = await conceptsRes.json();
     
-    const container = document.getElementById('gems-list');
-    container.innerHTML = gemsData.map((gem, i) => `
-        <div class="gem-card ${i === 0 ? 'active' : ''}" data-id="${gem.id}" data-index="${i}">
-            <span class="gem-badge">*</span>
-            <div class="title">${escapeHtml(gem.title)}</div>
-            <div class="meta">${gem.province || 'Österreich'}</div>
-        </div>
-    `).join('');
+    const highlights = [];
     
-    container.querySelectorAll('.gem-card').forEach(card => {
-        card.addEventListener('click', () => showDetail(card.dataset.id));
+    // Top 3 combinable concepts (those with most WFS coverage)
+    const topConcepts = (conceptsResult.concepts || [])
+        .filter(c => c.wfs_count >= 5 && c.provinces >= 5)
+        .sort((a, b) => (b.wfs_count * b.provinces) - (a.wfs_count * a.provinces))
+        .slice(0, 3);
+    
+    topConcepts.forEach(c => {
+        highlights.push({
+            type: 'concept',
+            id: c.id,
+            title: c.name_de,
+            subtitle: `${c.datasets} Datensätze aus ${c.provinces} Bundesländern kombinierbar`,
+            score: c.wfs_count
+        });
     });
     
-    // Start rotation
-    if (gemsData.length > 1) {
-        setInterval(rotateGems, 4000);
+    // Top individual gems
+    const topGems = (gemsResult.gems || []).slice(0, 4);
+    topGems.forEach(g => {
+        highlights.push({
+            type: 'dataset',
+            id: g.id,
+            title: g.title,
+            subtitle: g.province ? `Hochauflösende Daten aus ${g.province}` : 'Österreichweiter Datensatz mit WFS-Zugang',
+            score: g.score
+        });
+    });
+    
+    gemsData = highlights;
+    if (highlights.length === 0) {
+        document.getElementById('gems-list').innerHTML = '<p class="text-muted">Keine Highlights verfügbar</p>';
+        return;
+    }
+    
+    renderCurrentGem();
+    
+    // Rotate gems every 5 seconds
+    if (highlights.length > 1) {
+        setInterval(rotateGems, 5000);
     }
 }
 
-function rotateGems() {
-    const cards = document.querySelectorAll('.gem-card');
-    if (cards.length === 0) return;
+function renderCurrentGem() {
+    const container = document.getElementById('gems-list');
+    const gem = gemsData[currentGemIndex];
+    if (!gem) return;
     
-    cards[currentGemIndex].classList.remove('active');
-    currentGemIndex = (currentGemIndex + 1) % cards.length;
-    cards[currentGemIndex].classList.add('active');
+    const icon = gem.type === 'concept' ? '#' : '*';
+    
+    container.innerHTML = `
+        <div class="gem-card active" data-id="${gem.id}" data-type="${gem.type}">
+            <span class="gem-badge">${icon}</span>
+            <div class="title">${escapeHtml(gem.title)}</div>
+            <div class="gem-subtitle">${escapeHtml(gem.subtitle)}</div>
+        </div>
+    `;
+    
+    container.querySelector('.gem-card').addEventListener('click', () => {
+        if (gem.type === 'concept') {
+            showCombinationPanel(gem.id);
+        } else {
+            showDetail(gem.id);
+        }
+    });
+}
+
+function rotateGems() {
+    const container = document.getElementById('gems-list');
+    const oldCard = container.querySelector('.gem-card');
+    if (oldCard) oldCard.classList.remove('active');
+    
+    setTimeout(() => {
+        currentGemIndex = (currentGemIndex + 1) % gemsData.length;
+        renderCurrentGem();
+    }, 400);
 }
 
 async function search() {
+    // Close any open modals
+    closeModal();
+    closeCombinationPanel();
+    
     state.query = document.getElementById('search-input').value;
     
     // Also run smart search for concept matching
@@ -354,16 +417,45 @@ async function showDetail(id) {
         </div>
         ` : ''}
         
-        <div class="section">
+        <div class="section modal-actions">
             <a href="${data.inspire_url}" target="_blank" class="action-btn">-> INSPIRE Portal</a>
+            <button class="action-btn" onclick="shareDataset('${data.id}', '${escapeHtml(data.title).replace(/'/g, "\\'")}')">@ Link teilen</button>
         </div>
     `;
     
+    // Update URL for sharing
+    history.replaceState(null, '', '?dataset=' + id);
     document.getElementById('detail-modal').classList.add('open');
 }
 
 function closeModal() {
     document.getElementById('detail-modal').classList.remove('open');
+    // Reset URL if showing a dataset
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('dataset')) {
+        params.delete('dataset');
+        const newUrl = params.toString() ? '?' + params.toString() : window.location.pathname;
+        history.replaceState(null, '', newUrl);
+    }
+}
+
+function shareDataset(id, title) {
+    const url = window.location.origin + '?dataset=' + id;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('Link kopiert: ' + title);
+    });
+}
+
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('visible'), 10);
+    setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
 }
 
 function typeLabel(type) {
@@ -448,9 +540,20 @@ async function analyzeSelection() {
     showCombinationPanel(data);
 }
 
-function showCombinationPanel(data) {
+async function showCombinationPanel(dataOrConceptId) {
     const panel = document.getElementById('combination-panel');
     const content = document.getElementById('combination-content');
+    
+    // If passed a string, fetch the data
+    let data;
+    if (typeof dataOrConceptId === 'string') {
+        const res = await fetch('/api/combine?concept=' + encodeURIComponent(dataOrConceptId));
+        data = await res.json();
+        // Update URL for sharing
+        history.replaceState(null, '', '?concept=' + dataOrConceptId);
+    } else {
+        data = dataOrConceptId;
+    }
     
     const analysis = data.analysis;
     const coveragePct = analysis.coverage_pct.toFixed(0);
@@ -510,9 +613,12 @@ function showCombinationPanel(data) {
         <div class="analysis-section" style="margin-top: 1rem;">
             <strong>Shelley Prompt für Kombination:</strong>
             <div class="combination-prompt">${escapeHtml(data.combination_prompt)}</div>
-            <button class="copy-btn" onclick="copyText(document.querySelector('.combination-prompt').innerText)">
-                [+] Prompt kopieren
-            </button>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                <button class="copy-btn" onclick="copyText(document.querySelector('.combination-prompt').innerText)">
+                    [+] Prompt kopieren
+                </button>
+                <button class="copy-btn" onclick="shareConcept('${data.concept}')">[+] Link teilen</button>
+            </div>
         </div>
         ` : ''}
         
@@ -532,14 +638,25 @@ function showCombinationPanel(data) {
 
 function closeCombinationPanel() {
     document.getElementById('combination-panel').style.display = 'none';
+    // Reset URL if showing a concept
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('concept')) {
+        params.delete('concept');
+        const newUrl = params.toString() ? '?' + params.toString() : window.location.pathname;
+        history.replaceState(null, '', newUrl);
+    }
+}
+
+function shareConcept(conceptId) {
+    const url = window.location.origin + '?concept=' + conceptId;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('Link kopiert: ' + conceptId);
+    });
 }
 
 function copyText(text) {
     navigator.clipboard.writeText(text).then(() => {
-        const btn = event.target;
-        const orig = btn.textContent;
-        btn.textContent = '✓ Kopiert!';
-        setTimeout(() => btn.textContent = orig, 2000);
+        showToast('In Zwischenablage kopiert');
     });
 }
 

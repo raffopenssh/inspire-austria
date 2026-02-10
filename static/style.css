@@ -170,7 +170,13 @@ h1 {
 .gem-card .title {
     font-weight: 500;
     margin-bottom: 0.25rem;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+}
+
+.gem-card .gem-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
 }
 
 .gem-card .meta {
@@ -434,6 +440,8 @@ h1 {
     width: 100%;
     padding: 1.5rem;
     position: relative;
+    max-height: 85vh;
+    overflow-y: auto;
 }
 
 .close-btn {
@@ -742,4 +750,32 @@ footer code {
         flex-direction: column;
         text-align: center;
     }
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 2000;
+}
+
+.toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Modal actions */
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
