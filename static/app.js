@@ -46,10 +46,24 @@ async function init() {
     await loadGems();
     
     // Event listeners
-    document.getElementById('search-input').addEventListener('keypress', e => {
-        if (e.key === 'Enter') search();
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            closeAutocomplete();
+            search();
+        }
     });
-    document.getElementById('search-btn').addEventListener('click', search);
+    searchInput.addEventListener('input', debounce(handleAutocomplete, 200));
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.length >= 2) handleAutocomplete();
+    });
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.search-box')) closeAutocomplete();
+    });
+    document.getElementById('search-btn').addEventListener('click', () => {
+        closeAutocomplete();
+        search();
+    });
     
     document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
     document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
@@ -860,6 +874,172 @@ function toggleTreeFavorite(event, id) {
     const isFav = state.favorites.has(id);
     star.textContent = isFav ? '★' : '☆';
     star.classList.toggle('active', isFav);
+}
+
+// Autocomplete
+let acSelectedIndex = -1;
+
+function debounce(fn, delay) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+async function handleAutocomplete() {
+    const input = document.getElementById('search-input');
+    const q = input.value.trim();
+    
+    if (q.length < 2) {
+        closeAutocomplete();
+        return;
+    }
+    
+    const res = await fetch('/api/autocomplete?q=' + encodeURIComponent(q));
+    const data = await res.json();
+    renderAutocomplete(data.suggestions);
+}
+
+function renderAutocomplete(suggestions) {
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    
+    const hasResults = suggestions.combinable.length || suggestions.concepts.length || 
+                       suggestions.datasets.length || suggestions.fields.length;
+    
+    if (!hasResults) {
+        closeAutocomplete();
+        return;
+    }
+    
+    let html = '';
+    
+    // Combinable concepts (best for combining across provinces)
+    if (suggestions.combinable.length > 0) {
+        html += `<div class="ac-section">
+            <div class="ac-section-title"># Kombinierbar</div>
+            ${suggestions.combinable.map(c => `
+                <div class="ac-item" data-type="combine" data-id="${c.id}">
+                    <span class="ac-item-icon">#</span>
+                    <span class="ac-item-text">${escapeHtml(c.name)}</span>
+                    <span class="ac-item-badge combine">${c.wfs} WFS</span>
+                    <span class="ac-item-meta">${c.count} Datensätze</span>
+                </div>
+            `).join('')}
+        </div>`;
+    }
+    
+    // Categories
+    const nonCombinable = suggestions.concepts.filter(c => 
+        !suggestions.combinable.find(cb => cb.id === c.id)
+    );
+    if (nonCombinable.length > 0) {
+        html += `<div class="ac-section">
+            <div class="ac-section-title">Kategorien</div>
+            ${nonCombinable.map(c => `
+                <div class="ac-item" data-type="concept" data-id="${c.id}">
+                    <span class="ac-item-icon">▸</span>
+                    <span class="ac-item-text">${escapeHtml(c.name)}</span>
+                    <span class="ac-item-meta">${c.count}</span>
+                </div>
+            `).join('')}
+        </div>`;
+    }
+    
+    // Datasets
+    if (suggestions.datasets.length > 0) {
+        html += `<div class="ac-section">
+            <div class="ac-section-title">Datensätze</div>
+            ${suggestions.datasets.map(d => `
+                <div class="ac-item" data-type="dataset" data-id="${d.id}">
+                    <span class="ac-item-icon">${d.gem ? '◆' : '○'}</span>
+                    <span class="ac-item-text">${escapeHtml(d.title)}</span>
+                    ${d.wfs ? '<span class="ac-item-badge wfs">WFS</span>' : ''}
+                    ${d.province ? `<span class="ac-item-meta">${d.province}</span>` : ''}
+                </div>
+            `).join('')}
+        </div>`;
+    }
+    
+    // Fields
+    if (suggestions.fields.length > 0) {
+        html += `<div class="ac-section">
+            <div class="ac-section-title">Attribute</div>
+            ${suggestions.fields.map(f => `
+                <div class="ac-item" data-type="field" data-id="${f.id}">
+                    <span class="ac-item-icon">☰</span>
+                    <span class="ac-item-text">${escapeHtml(f.name)}</span>
+                    <span class="ac-item-meta">${f.id}</span>
+                </div>
+            `).join('')}
+        </div>`;
+    }
+    
+    dropdown.innerHTML = html;
+    dropdown.classList.add('open');
+    acSelectedIndex = -1;
+    
+    // Add click handlers
+    dropdown.querySelectorAll('.ac-item').forEach(item => {
+        item.addEventListener('click', () => selectAutocompleteItem(item));
+    });
+}
+
+function selectAutocompleteItem(item) {
+    const type = item.dataset.type;
+    const id = item.dataset.id;
+    
+    closeAutocomplete();
+    
+    if (type === 'combine') {
+        showCombinationPanel(id);
+    } else if (type === 'concept') {
+        document.getElementById('search-input').value = item.querySelector('.ac-item-text').textContent;
+        search();
+    } else if (type === 'dataset') {
+        showDetail(id);
+    } else if (type === 'field') {
+        document.getElementById('search-input').value = id;
+        search();
+    }
+}
+
+function closeAutocomplete() {
+    document.getElementById('autocomplete-dropdown').classList.remove('open');
+    acSelectedIndex = -1;
+}
+
+// Keyboard navigation for autocomplete
+document.addEventListener('keydown', e => {
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    if (!dropdown.classList.contains('open')) return;
+    
+    const items = dropdown.querySelectorAll('.ac-item');
+    if (items.length === 0) return;
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        acSelectedIndex = Math.min(acSelectedIndex + 1, items.length - 1);
+        updateAcSelection(items);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        acSelectedIndex = Math.max(acSelectedIndex - 1, 0);
+        updateAcSelection(items);
+    } else if (e.key === 'Enter' && acSelectedIndex >= 0) {
+        e.preventDefault();
+        selectAutocompleteItem(items[acSelectedIndex]);
+    } else if (e.key === 'Escape') {
+        closeAutocomplete();
+    }
+});
+
+function updateAcSelection(items) {
+    items.forEach((item, i) => {
+        item.classList.toggle('selected', i === acSelectedIndex);
+    });
+    if (acSelectedIndex >= 0) {
+        items[acSelectedIndex].scrollIntoView({ block: 'nearest' });
+    }
 }
 
 // Initialize

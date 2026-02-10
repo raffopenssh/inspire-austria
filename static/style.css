@@ -60,8 +60,8 @@ h1 {
     margin: 0 auto 1.5rem;
     border: 1px solid var(--border);
     border-radius: 4px;
-    overflow: hidden;
     background: var(--bg);
+    position: relative;
 }
 
 .search-box:focus-within {
@@ -88,6 +88,7 @@ h1 {
     background: var(--bg-secondary);
     border: none;
     border-left: 1px solid var(--border);
+    border-radius: 0 4px 4px 0;
     color: var(--text-muted);
     font-family: inherit;
     font-size: 0.9rem;
@@ -951,4 +952,97 @@ footer code {
 .tree-province {
     font-size: 0.7rem;
     color: var(--text-muted);
+}
+
+/* Autocomplete */
+.autocomplete-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 900;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.autocomplete-dropdown.open {
+    display: block;
+}
+
+.ac-section {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.ac-section:last-child {
+    border-bottom: none;
+}
+
+.ac-section-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.25rem 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ac-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.ac-item:hover, .ac-item.selected {
+    background: var(--bg-secondary);
+}
+
+.ac-item-icon {
+    width: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.ac-item-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ac-item-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.ac-item-badge {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    background: var(--bg-secondary);
+}
+
+.ac-item-badge.wfs {
+    background: var(--success);
+    color: white;
+}
+
+.ac-item-badge.gem {
+    background: var(--accent);
+    color: white;
+}
+
+.ac-item-badge.combine {
+    background: var(--warning);
+    color: white;
 }

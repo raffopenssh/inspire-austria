@@ -87,6 +87,8 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.handle_validation()
         elif path == '/api/schema':
             self.handle_schema(query)
+        elif path == '/api/autocomplete':
+            self.handle_autocomplete(query)
         elif path == '/api/browse':
             self.handle_browse()
         elif path == '/api/fields':
@@ -529,6 +531,84 @@ class InspireHandler(BaseHTTPRequestHandler):
         
         else:
             self.send_json({'error': 'unknown action'}, 400)
+    
+    def handle_autocomplete(self, query):
+        """Hierarchical autocomplete for search."""
+        q = query.get('q', [''])[0].strip().lower()
+        if len(q) < 2:
+            self.send_json({'suggestions': []})
+            return
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        results = {
+            'concepts': [],      # Categories
+            'combinable': [],    # Concepts with good WFS coverage
+            'datasets': [],      # Individual datasets
+            'fields': []         # Field/attribute names
+        }
+        
+        # Search concepts
+        cur.execute('''
+            SELECT c.id, c.name_de, COUNT(dc.dataset_id) as cnt,
+                   COUNT(DISTINCT CASE WHEN s.service_type = 'WFS' THEN d.id END) as wfs_cnt
+            FROM concepts c
+            LEFT JOIN dataset_concepts dc ON c.id = dc.concept_id
+            LEFT JOIN datasets d ON dc.dataset_id = d.id
+            LEFT JOIN dataset_services s ON d.id = s.dataset_id
+            WHERE LOWER(c.name_de) LIKE ? OR LOWER(c.name_en) LIKE ? OR LOWER(c.id) LIKE ?
+            GROUP BY c.id
+            ORDER BY cnt DESC
+            LIMIT 5
+        ''', (f'%{q}%', f'%{q}%', f'%{q}%'))
+        
+        for row in cur.fetchall():
+            concept = {'id': row[0], 'name': row[1], 'count': row[2], 'wfs': row[3]}
+            results['concepts'].append(concept)
+            if row[3] >= 3:  # Has 3+ WFS services = combinable
+                results['combinable'].append(concept)
+        
+        # Search datasets using FTS with prefix matching
+        search_terms = q.split()
+        fts_query = ' '.join(f'"{term}"*' for term in search_terms if term)
+        
+        if fts_query:
+            cur.execute('''
+                SELECT d.id, d.title, d.province, d.gem_score,
+                       GROUP_CONCAT(DISTINCT s.service_type) as services
+                FROM datasets d
+                JOIN datasets_fts fts ON d.id = fts.id
+                LEFT JOIN dataset_services s ON d.id = s.dataset_id
+                WHERE datasets_fts MATCH ?
+                GROUP BY d.id
+                ORDER BY d.gem_score DESC
+                LIMIT 8
+            ''', (fts_query,))
+            
+            for row in cur.fetchall():
+                svc = row[4].split(',') if row[4] else []
+                results['datasets'].append({
+                    'id': row[0],
+                    'title': row[1],
+                    'province': row[2] or '',
+                    'gem': row[3] >= 8,
+                    'wfs': 'WFS' in svc
+                })
+        
+        # Search field names
+        cur.execute('''
+            SELECT DISTINCT cf.id, cf.description_de
+            FROM canonical_fields cf
+            WHERE LOWER(cf.id) LIKE ? OR LOWER(cf.description_de) LIKE ?
+            LIMIT 4
+        ''', (f'%{q}%', f'%{q}%'))
+        
+        for row in cur.fetchall():
+            results['fields'].append({'id': row[0], 'name': row[1]})
+        
+        conn.close()
+        self.send_json({'suggestions': results})
     
     def handle_browse(self):
         """Get all datasets organized by concept for browsing."""
