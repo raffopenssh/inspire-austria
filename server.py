@@ -414,17 +414,17 @@ class InspireHandler(BaseHTTPRequestHandler):
         
         conn.close()
         
-        # Generate prompt
-        prompt_lines = ["Arbeite mit folgenden österreichischen INSPIRE-Geodatensätzen:\n"]
+        # Generate prompt (English for Shelley)
+        prompt_lines = ["Work with the following Austrian INSPIRE geodatasets:\n"]
         
         for ds in datasets_info:
-            prompt_lines.append(f"**{ds['title']}** ({ds['type']}, {ds['province'] or 'Österreich'})")
+            prompt_lines.append(f"**{ds['title']}** ({ds['type']}, {ds['province'] or 'Austria'})")
             for svc in ds['services']:
                 if svc['type'] in ('WFS', 'OGC-API'):
                     prompt_lines.append(f"  - {svc['type']}: {svc['url']}")
             prompt_lines.append("")
         
-        prompt_lines.append("\nLade die Daten, analysiere die Struktur und erstelle eine Zusammenfassung.")
+        prompt_lines.append("\nLoad the data, analyze the structure, and create a summary.")
         
         prompt = '\n'.join(prompt_lines)
         self.send_json({'prompt': prompt, 'datasets': datasets_info})
@@ -1091,30 +1091,30 @@ class InspireHandler(BaseHTTPRequestHandler):
         self.send_json(result)
     
     def generate_combination_prompt(self, concept, wfs_services, common_fields, field_mappings):
-        """Generate a Shelley prompt for combining datasets."""
-        lines = [f"Kombiniere folgende {concept}-Datensätze zu einem österreichweiten Datensatz:\n"]
+        """Generate a Shelley prompt for combining datasets (English)."""
+        lines = [f"Combine the following {concept} datasets into an Austria-wide dataset:\n"]
         
         for svc in wfs_services[:6]:  # Limit to 6
             lines.append(f"**{svc['title']}** ({svc['province'] or 'National'})")
             lines.append(f"  WFS: {svc['url']}")
             if svc.get('fields'):
-                lines.append(f"  Felder: {', '.join(svc['fields'][:8])}")
+                lines.append(f"  Fields: {', '.join(svc['fields'][:8])}")
         
         if common_fields:
-            lines.append(f"\n**Gemeinsame/ähnliche Felder:** {', '.join(list(common_fields)[:10])}")
+            lines.append(f"\n**Common fields:** {', '.join(list(common_fields)[:10])}")
         
         if field_mappings:
-            lines.append("\n**Kanonische Feldnamen (für Vereinheitlichung):**")
+            lines.append("\n**Canonical field names (for harmonization):**")
             for fm in field_mappings[:8]:
                 lines.append(f"  - {fm['field']} → {fm['canonical']} ({fm['description']})")
         
-        lines.append("\n**Aufgabe:**")
-        lines.append("1. Lade alle WFS-Daten mit OWSLib oder requests als GeoDataFrames")
-        lines.append("2. Prüfe die Spaltennamen jedes DataFrames")
-        lines.append("3. Mappe auf gemeinsame Spaltennamen (siehe Feldmappings)")
-        lines.append("4. Füge 'bundesland' Spalte hinzu")
-        lines.append("5. Kombiniere mit gpd.pd.concat()")
-        lines.append("6. Exportiere als GeoPackage: combined.to_file('output.gpkg', driver='GPKG')")
+        lines.append("\n**Task:**")
+        lines.append("1. Load all WFS data using OWSLib or requests as GeoDataFrames")
+        lines.append("2. Inspect column names of each DataFrame")
+        lines.append("3. Map to common column names (see field mappings)")
+        lines.append("4. Add 'bundesland' (province) column")
+        lines.append("5. Combine using gpd.pd.concat()")
+        lines.append("6. Export as GeoPackage: combined.to_file('output.gpkg', driver='GPKG')")
         
         return '\n'.join(lines)
     
