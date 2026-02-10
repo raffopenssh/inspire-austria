@@ -1,0 +1,2260 @@
+{
+  "total": 1754,
+  "types": {
+    "service": 532,
+    "dataset": 1198,
+    "series": 18,
+    "featureCatalog": 6
+  },
+  "provinces": {
+    "Salzburg": 62,
+    "Tirol": 115,
+    "Kärnten": 27,
+    "Niederösterreich": 29,
+    "Burgenland": 69,
+    "Oberösterreich": 57,
+    "Vorarlberg": 21,
+    "Steiermark": 80,
+    "Wien": 66
+  },
+  "themes": {
+    "transport networks": 192,
+    "population distribution — demography": 35,
+    "orthoimagery": 247,
+    "cadastral parcels": 15,
+    "elevation": 864,
+    "area management/restriction/regulation zones and reporting units": 54,
+    "buildings": 15,
+    "administrative units": 37,
+    "land cover": 121,
+    "protected sites": 137,
+    "land use": 127,
+    "utility and governmental services": 78,
+    "statistical units": 21,
+    "addresses": 23,
+    "natural risk zones": 15,
+    "geographical names": 25,
+    "habitats and biotopes": 50,
+    "coordinate reference systems": 27,
+    "energy resources": 25,
+    "bauwerk": 6,
+    "bio-geographical regions": 9,
+    "atmospheric conditions": 14,
+    "meteorological geographical features": 12,
+    "geographical grid systems": 4,
+    "production and industrial facilities": 5,
+    "hydrography": 3,
+    "human health and safety": 2,
+    "agricultural and aquaculture facilities": 16,
+    "soil": 16,
+    "geology": 18,
+    "species distribution": 25,
+    "environmental monitoring facilities": 8,
+    "mineral resources": 5
+  },
+  "topics": {
+    "verkehr": 271,
+    "höhenmodell": 891,
+    "bevölkerung": 44,
+    "gewässer": 896,
+    "boden": 655,
+    "orthofoto": 470,
+    "umwelt": 918,
+    "kataster": 60,
+    "wald": 362,
+    "raumordnung": 331,
+    "geologie": 600,
+    "landwirtschaft": 678,
+    "grundwasser": 22,
+    "naturschutz": 255,
+    "gebäude": 112,
+    "gesundheit": 19,
+    "adresse": 12,
+    "energie": 69,
+    "wetter": 23,
+    "hochwasser": 5
+  },
+  "service_types": {
+    "WFS": 382,
+    "WMS": 803,
+    "Link": 2641,
+    "ATOM": 1171,
+    "Download": 1700,
+    "OGC-API": 31
+  },
+  "gems": [
+    {
+      "id": "14a42205-57a3-4fd4-9364-56d667187a4e",
+      "title": "INSPIRE WFS Service Solarstrahlung 2013 Tirol",
+      "score": 13,
+      "topics": [
+        "gewässer",
+        "energie",
+        "höhenmodell",
+        "gebäude"
+      ],
+      "province": "Tirol",
+      "services": [
+        "WFS"
+      ]
+    },
+    {
+      "id": "d3c15074-47d9-485e-8f9e-498336f73563",
+      "title": "Solarstrahlung 2013 Tirol",
+      "score": 13,
+      "topics": [
+        "gewässer",
+        "energie",
+        "höhenmodell",
+        "gebäude"
+      ],
+      "province": "Tirol",
+      "services": [
+        "WFS",
+        "WMS"
+      ]
+    },
+    {
+      "id": "b87c2f56-ecd5-4703-baa3-8398e138a58c",
+      "title": "Waldkarte BFW Österreich",
+      "score": 13,
+      "topics": [
+        "boden",
+        "wald",
+        "raumordnung",
+        "verkehr",
+        "höhenmodell",
+        "orthofoto",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "WMS",
+        "Download",
+        "WMS",
+        "WMS",
+        "Download",
+        "WFS"
+      ]
+    },
+    {
+      "id": "b0039df4-e55d-400b-a15f-7da8291a0bd2",
+      "title": "Landnutzung Tirol",
+      "score": 12,
+      "topics": [
+        "gewässer",
+        "boden",
+        "wald",
+        "verkehr",
+        "höhenmodell",
+        "landwirtschaft"
+      ],
+      "province": "Tirol",
+      "services": [
+        "WFS",
+        "ATOM",
+        "WMS"
+      ]
+    },
+    {
+      "id": "89eab1c4-79d8-4941-9639-38f07ed755b4",
+      "title": "Schutzgebiete Österreich 2025",
+      "score": 12,
+      "topics": [
+        "naturschutz"
+      ],
+      "province": null,
+      "services": [
+        "WMS",
+        "ATOM",
+        "WFS",
+        "OGC-API"
+      ]
+    },
+    {
+      "id": "9e76e2df-ee2e-4571-8362-0d2328ad456e",
+      "title": "Invasive gebietsfremde Arten der Unionsliste in Österreich",
+      "score": 11,
+      "topics": [
+        "gewässer",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Download",
+        "WMS",
+        "WFS",
+        "ATOM",
+        "ATOM"
+      ]
+    },
+    {
+      "id": "cba2fcfd-4144-4680-ab74-e89fd4d5e58d",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4300000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "27ad8830-874a-4eff-88ff-53230ebd3cce",
+      "title": "ALS DTM CRS3035RES50000mN2600000E4650000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "599032da-1e32-4c9f-9902-6de1cd64f4f5",
+      "title": "ALS DTM CRS3035RES50000mN2800000E4550000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "b26b6b74-fa04-4e05-abf6-d6cf8b1e3e70",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4600000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "db37c14e-c3fd-46f5-baca-35fd8f4a56bc",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4750000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "8f6052cf-a157-4525-a84f-b8c82e832305",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4800000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "42ad5dcf-3417-457b-a729-991a1fd41c8b",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4450000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "93b0fcdf-60b8-44cd-a08c-d31823b8013a",
+      "title": "ALS DSM CRS3035RES50000mN2750000E4850000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "38a8d505-3e66-49f9-b8f3-461d70216895",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4550000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "d5178971-2b61-469a-8b58-cd234c510ae9",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4250000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "3563eb95-c95a-4ff2-b638-ab50023d938a",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4600000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "9d49bab6-6311-461a-8ae8-c00fc62f6587",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4550000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "5b17ecda-52f8-47f8-9ec3-92a99bb32d21",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4350000 Höhenraster 1m Stichtag 15.09.2023",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "88725d11-ff3f-453d-8839-f36bb7bc04df",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4650000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "12ebd0aa-b74b-481e-9e0c-bd09d8031d70",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4300000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "6a819d90-7b4b-415f-a8ad-d97ce9d7b454",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4450000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "661ebe45-f5ec-4aac-82b2-70037e4c3248",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4500000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "87e5b812-7f68-4526-83d6-8c501cb1a6f0",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4550000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "d5bc7a1f-5a16-477d-a560-8eba390e2dcd",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4250000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "bf5abf33-c984-421d-88e4-11ef0857fbe1",
+      "title": "ALS DTM CRS3035RES50000mN2750000E4500000 Höhenraster 1m Stichtag 15.09.2023",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "1b2e1d2d-8f55-4204-8c55-5305f41e663e",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4500000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "76900e86-ac6f-4f02-868f-341f5b1691f5",
+      "title": "ALS DSM CRS3035RES50000mN2850000E4750000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "bb4425d1-c3ef-444a-b122-8e1b5662b3ca",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4650000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "803b8be7-881b-4af0-ae99-862fd88fea5d",
+      "title": "ALS DSM CRS3035RES50000mN2850000E4650000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "9d426312-8803-42b7-9f34-ec48d337b7af",
+      "title": "ALS DSM CRS3035RES50000mN2750000E4800000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "60a887c5-3655-44c0-a9d9-103ccb479995",
+      "title": "ALS DSM CRS3035RES50000mN2750000E4600000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "a0e1bbc8-1cc8-438a-a0cf-3dc616bfb5cc",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4700000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "653e3c95-e3c4-441b-97de-112254fc3d7c",
+      "title": "ALS DSM CRS3035RES50000mN2850000E4750000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "f43b505a-7331-40fb-8dd1-1d2677b805b8",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4400000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "43b8a62b-836a-4d61-a09d-a9e2551b3ed8",
+      "title": "ALS DTM CRS3035RES50000mN2850000E4800000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "c84ca462-70b8-4b5f-ae59-7affd5549f77",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4500000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "41c0382c-dc88-443c-aefd-28c8c9ade43c",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4800000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "8c54c30f-b68d-4156-892f-b26a2c49b52b",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4700000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "8c7b76dd-0029-4c07-9f2b-b89bd88d69d6",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4300000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "869f0364-bdf2-4827-b01c-9afc9d986d4d",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4450000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "a65dde0f-4b99-4acf-adef-1f6f3ab6c49d",
+      "title": "ALS DSM CRS3035RES50000mN2750000E4500000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "f2d6cefc-10ef-4da7-8d87-1acbdb1ade82",
+      "title": "ALS DTM CRS3035RES50000mN2850000E4750000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "b329c987-f69e-46b1-b3fc-b08eeea3875e",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4800000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "91190b08-48fb-453b-a350-a2d5dc6ea725",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4350000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "bc592f6f-423e-4d90-a6a6-786ec52550ab",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4800000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "2c7d5893-b621-4b52-8d8a-05e26b178864",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4650000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "09f24894-a418-4422-b167-984beadeb165",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4450000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "2eb34f7c-ef72-40a5-a777-c27d059667a6",
+      "title": "ALS DSM CRS3035RES50000mN2550000E4650000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "8c8a42c2-fa4f-425d-a031-4c551546d47c",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4800000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "7d8f57d4-97a0-4b84-be06-46d43eecfaf4",
+      "title": "ALS DSM CRS3035RES50000mN2750000E4700000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "df7a9818-98df-4897-8c94-08d1b11c7bfb",
+      "title": "ALS DTM CRS3035RES50000mN2600000E4500000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "da8ca39f-a1a4-4b0b-b617-93f2b4feabfb",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4700000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "768b66cd-4d55-461d-941e-aed50e1e9195",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4450000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "e9f5b3f3-cc5c-4996-8ba1-eb15580cf023",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4350000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "5e967c55-2e54-4f60-95b4-70c568524450",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4750000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "7e938303-046b-4e56-886d-80f68c4e873a",
+      "title": "ALS DTM CRS3035RES50000mN2750000E4500000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "90515da9-8a93-495c-a643-f6d2a1cdb449",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4800000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "799b8f7e-0f40-473e-802b-145b99bc03b9",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4650000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "9aec5845-1047-4658-936f-8b74f917c26e",
+      "title": "ALS DTM CRS3035RES50000mN2650000E4750000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "e8217a7d-568a-4686-85e8-5964944bc1f3",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4350000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "418f6218-fefe-46d1-8c73-7ee5b6f32161",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4600000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "b1c8b348-2856-40fc-ae93-c5de5efcab3c",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4550000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "7e57f634-1e13-4d8d-abd9-c25eb28c22c2",
+      "title": "ALS DTM CRS3035RES50000mN2750000E4750000 Höhenraster 1m Stichtag 15.09.2023",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "3f683d05-f426-458f-9b3e-1e178854d264",
+      "title": "ALS DTM CRS3035RES50000mN2600000E4550000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "7278b757-d30d-48dd-ab0f-4afc570595ff",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4500000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "91637b0a-1367-443b-ae7b-018bbbc4de71",
+      "title": "ALS DTM CRS3035RES50000mN2750000E4550000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "1fe751d0-7b2c-4403-b442-71f1d10779ad",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4400000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "3e2f8522-a429-462a-8d7e-6a69b6241b9c",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4500000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "1c8325ba-c226-4753-828e-1bcff26cc8f1",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4750000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "f30bd19f-6f38-4c61-9398-39abe3a38133",
+      "title": "ALS DTM CRS3035RES50000mN2800000E4800000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "e8c25aa5-23d9-4846-91c0-2ab2297bee11",
+      "title": "ALS DTM CRS3035RES50000mN2750000E4800000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "692c897f-03bf-4865-9549-4b9e119a3b24",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4450000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "7e4fa02e-c4b4-4ca7-b36c-028eb5730965",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4550000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "76c25168-08bc-476c-b58b-20cd5b68f401",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4500000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "a867a0d3-4fa3-4b47-8f3a-ae0deb7daa8a",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4300000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "041d566a-afd8-47ed-86aa-556d7536d036",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4300000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "d5dc284b-4949-46a0-a355-710b79e37f30",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4650000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "403a062a-c0d5-41c5-af23-fc9fbc07a03b",
+      "title": "ALS DSM CRS3035RES50000mN2750000E4650000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "6e7c8c5e-fa51-4f02-8336-ac5c65b42aad",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4700000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "0f077a92-b5d8-4f71-969d-f42979e1e81f",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4400000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "7cacb62d-b18d-4b05-9389-c58f724abb3b",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4600000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "0a19f243-844f-4ee2-8085-26ea6e1f9cdf",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4500000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "a3a5b769-a2aa-4a62-8139-98f7f8c5cf3a",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4450000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "47d9de81-e51e-40bc-99ea-b1d2e91071f7",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4650000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "82e60acd-329d-46fa-9812-22d9b1f7abe0",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4750000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "d0a6b746-3a4f-48cc-8218-beed12c20655",
+      "title": "ALS DSM CRS3035RES50000mN2850000E4800000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "57f46a70-7c90-44bb-91db-d665fc66697d",
+      "title": "ALS DSM CRS3035RES50000mN2600000E4750000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "afb24620-ebb3-4d9e-9835-359665deca7e",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4500000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "ae6d2a2d-8706-4cef-9ca2-b8691f5a58b6",
+      "title": "ALS DSM CRS3035RES50000mN2650000E4800000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "572ec346-919c-4d33-93d1-b2153de329ae",
+      "title": "ALS DTM CRS3035RES50000mN2800000E4750000 Höhenraster 1m Stichtag 15.09.2023",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "03430a2b-e39a-4413-9142-b08beb00bc3f",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4550000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "48887cf2-3b18-4b4c-a338-1d21ec630fa2",
+      "title": "ALS DSM CRS3035RES50000mN2850000E4650000 Höhenraster 1m Stichtag 15.09.2024",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "6f5d7526-a6cc-4e3a-ac9f-fa68bd9b1ecc",
+      "title": "ALS DTM CRS3035RES50000mN2800000E4700000 Höhenraster 1m Stichtag 15.09.2023",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "81afa637-8956-4bd8-af7c-14983b47499c",
+      "title": "ALS DTM CRS3035RES50000mN2750000E4850000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "6f569756-b159-46ec-9b6c-ea14d2326f39",
+      "title": "ALS DTM CRS3035RES50000mN2700000E4700000 Höhenraster 1m Stichtag 15.09.2023",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "boden",
+        "geologie",
+        "höhenmodell",
+        "orthofoto",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "c4d60a3e-c8c8-4228-b614-eea8374a1371",
+      "title": "ALS DSM CRS3035RES50000mN2800000E4600000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "b94c9d83-a899-48e9-b8d3-1bd537714a67",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4250000 Höhenraster 1m Stichtag 15.09.2022",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "e84e8763-ad55-46ea-9afa-89cd6a15de65",
+      "title": "ALS DSM CRS3035RES50000mN2750000E4800000 Höhenraster 1m Stichtag 15.09.2021",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    },
+    {
+      "id": "abc50cd5-ec7d-47ec-98e9-e9116d6869cd",
+      "title": "ALS DSM CRS3035RES50000mN2700000E4450000 Höhenraster 1m Stichtag 15.09.2019",
+      "score": 10,
+      "topics": [
+        "gewässer",
+        "wald",
+        "raumordnung",
+        "geologie",
+        "höhenmodell",
+        "landwirtschaft",
+        "umwelt"
+      ],
+      "province": null,
+      "services": [
+        "Link",
+        "Link",
+        "ATOM",
+        "Download",
+        "Link"
+      ]
+    }
+  ]
+}

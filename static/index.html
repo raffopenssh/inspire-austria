@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INSPIRE Österreich Suche</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌿 INSPIRE Österreich</h1>
+            <p class="subtitle">Entdecke österreichische Geodaten - einfach durchsuchbar</p>
+        </header>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Suche nach Grundwasser, Wald, Kataster, Hochwasser..." autofocus>
+            <button id="search-btn">🔍</button>
+        </div>
+        
+        <div class="filters">
+            <select id="filter-type">
+                <option value="">Alle Typen</option>
+                <option value="dataset">Datensatz</option>
+                <option value="service">Service</option>
+                <option value="series">Serie</option>
+            </select>
+            <select id="filter-province">
+                <option value="">Alle Bundesländer</option>
+                <option value="Wien">Wien</option>
+                <option value="Niederösterreich">Niederösterreich</option>
+                <option value="Oberösterreich">Oberösterreich</option>
+                <option value="Salzburg">Salzburg</option>
+                <option value="Tirol">Tirol</option>
+                <option value="Vorarlberg">Vorarlberg</option>
+                <option value="Kärnten">Kärnten</option>
+                <option value="Steiermark">Steiermark</option>
+                <option value="Burgenland">Burgenland</option>
+            </select>
+            <select id="filter-service">
+                <option value="">Alle Services</option>
+                <option value="WFS">WFS (Vektor)</option>
+                <option value="WMS">WMS (Karte)</option>
+                <option value="OGC-API">OGC API</option>
+                <option value="Download">Download</option>
+                <option value="ATOM">ATOM Feed</option>
+            </select>
+            <button id="favorites-btn" class="filter-btn">★ Favoriten (<span id="favorites-count">0</span>)</button>
+        </div>
+        
+        <div class="topics-bar" id="topics-bar">
+            <!-- Topic tags loaded dynamically -->
+        </div>
+        
+        <div class="gems-section" id="gems-section">
+            <h3>💎 Entdecke Datensätze</h3>
+            <div class="gems-list" id="gems-list">
+                <!-- Gems loaded dynamically -->
+            </div>
+        </div>
+        
+        <div class="selection-bar" id="selection-bar" style="display: none;">
+            <span id="selection-count">0 ausgewählt</span>
+            <button id="copy-prompt-btn">📋 Shelley Prompt kopieren</button>
+            <button id="clear-selection-btn">✕ Auswahl aufheben</button>
+        </div>
+        
+        <div class="results-info" id="results-info"></div>
+        
+        <div class="results" id="results">
+            <!-- Search results loaded here -->
+        </div>
+        
+        <div class="pagination" id="pagination"></div>
+        
+        <div class="modal" id="detail-modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <div id="detail-content"></div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Daten: <a href="https://geometadatensuche.inspire.gv.at" target="_blank">INSPIRE Geoportal Österreich</a></p>
+            <p>API: <code>/api/llm?action=help</code> für LLM-optimierten Zugriff</p>
+        </footer>
+    </div>
+    
+    <script src="/app.js"></script>
+</body>
+</html>

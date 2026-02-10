@@ -1,0 +1,14 @@
+[Unit]
+Description=INSPIRE Austria Search Service
+After=network.target
+
+[Service]
+Type=simple
+User=exedev
+WorkingDirectory=/home/exedev/inspire-austria
+ExecStart=/usr/bin/python3 /home/exedev/inspire-austria/server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
