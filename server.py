@@ -438,19 +438,42 @@ class InspireHandler(BaseHTTPRequestHandler):
         
         if action == 'help':
             self.send_json({
-                'api': 'INSPIRE Austria LLM API v1',
-                'description': 'Österreichische Geodaten-Suche für LLM-Agenten',
-                'endpoints': {
-                    'search': '/api/llm?action=search&q=QUERY - Suche Datensätze',
-                    'topic': '/api/llm?action=topic&name=NAME - Alle Daten zu einem Thema',
-                    'services': '/api/llm?action=services&type=WFS|WMS|OGC-API - Verfügbare Services',
-                    'gems': '/api/llm?action=gems - Top-Datensätze',
-                    'access': '/api/llm?action=access&id=ID - Zugriffsinformationen'
+                'api': 'INSPIRE Austria LLM API v2',
+                'description': 'Austrian geodata search for LLM agents. 1,754 datasets indexed from INSPIRE Geoportal Austria.',
+                'stats': {
+                    'datasets': 1754,
+                    'with_wfs': 381,
+                    'with_ogc_api': 31,
+                    'concepts': 44,
+                    'provinces': 9
                 },
-                'topics': ['grundwasser', 'wetter', 'hochwasser', 'gewässer', 'boden', 'wald', 
-                          'naturschutz', 'kataster', 'raumordnung', 'verkehr', 'energie', 
-                          'geologie', 'höhenmodell', 'orthofoto', 'adresse', 'gebäude',
-                          'bevölkerung', 'landwirtschaft', 'gesundheit', 'umwelt']
+                'endpoints': {
+                    'search': '/api/llm?action=search&q=QUERY - Search datasets (returns compact results)',
+                    'concept': '/api/llm?action=concept&id=ID - Get all datasets for a concept (e.g., grundwasser, wald)',
+                    'combine': '/api/combine?concept=ID - Get combination analysis with WFS URLs and field mappings',
+                    'services': '/api/llm?action=services&type=WFS|WMS|OGC-API - List available services',
+                    'gems': '/api/llm?action=gems - Top quality datasets',
+                    'access': '/api/llm?action=access&id=UUID - Get service URLs for a specific dataset',
+                    'concepts': '/api/concepts - List all 44 concepts with coverage stats',
+                    'coverage': '/api/coverage?concept=ID - Provincial coverage for a concept',
+                    'schema': '/api/schema?id=UUID - Get WFS field schema for a dataset',
+                    'fields': '/api/fields - Canonical field mappings across provinces'
+                },
+                'key_concepts': [
+                    'invekos - Agricultural subsidies 2015-2025 (64 datasets, time series)',
+                    'hydrologie_live - Real-time water levels, groundwater, precipitation',
+                    'kataster_live - Daily updated cadastre and addresses',
+                    'höhenmodell - 1m LiDAR elevation (DTM/DSM)',
+                    'naturschutzgebiet - Protected areas (Natura 2000, national parks)',
+                    'flächenwidmung - Zoning/land use plans',
+                    'wald - Forest maps (BFW Waldkarte)',
+                    'wasserschutzgebiet - Water protection zones'
+                ],
+                'example_workflow': [
+                    '1. /api/llm?action=search&q=grundwasser -> find relevant datasets',
+                    '2. /api/combine?concept=grundwasser -> get WFS URLs and field mappings',
+                    '3. Load WFS data with OWSLib, harmonize fields, combine with geopandas'
+                ]
             })
         
         elif action == 'search':
