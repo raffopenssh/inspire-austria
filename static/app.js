@@ -74,6 +74,7 @@ async function init() {
     
     document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
     document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
+    document.getElementById('analyze-btn').addEventListener('click', analyzeSelection);
     
     document.querySelector('.close-btn').addEventListener('click', closeModal);
     document.getElementById('detail-modal').addEventListener('click', e => {
@@ -145,6 +146,13 @@ async function loadGems() {
 
 async function search() {
     state.query = document.getElementById('search-input').value;
+    
+    // Also run smart search for concept matching
+    if (state.query) {
+        smartSearch();
+    } else {
+        document.getElementById('smart-results').style.display = 'none';
+    }
     
     const params = new URLSearchParams();
     if (state.query) params.set('q', state.query);
@@ -462,6 +470,179 @@ async function showFavorites() {
     renderResults(results);
     document.getElementById('results-info').textContent = `${results.length} Favoriten`;
     document.getElementById('pagination').innerHTML = '';
+}
+
+async function analyzeSelection() {
+    if (state.selected.size < 2) {
+        alert('Wähle mindestens 2 Datensätze aus');
+        return;
+    }
+    
+    const ids = Array.from(state.selected).join(',');
+    const res = await fetch(`/api/combine?ids=${encodeURIComponent(ids)}`);
+    const data = await res.json();
+    
+    showCombinationPanel(data);
+}
+
+function showCombinationPanel(data) {
+    const panel = document.getElementById('combination-panel');
+    const content = document.getElementById('combination-content');
+    
+    const analysis = data.analysis;
+    const coveragePct = analysis.coverage_pct.toFixed(0);
+    
+    const allProvinces = ['Wien', 'Niederösterreich', 'Oberösterreich', 'Salzburg', 'Tirol', 'Vorarlberg', 'Kärnten', 'Steiermark', 'Burgenland'];
+    
+    content.innerHTML = `
+        <div class="coverage-bar">
+            <strong>Österreich-Abdeckung: ${coveragePct}%</strong>
+            <div class="coverage-meter">
+                <div class="fill" style="width: ${coveragePct}%"></div>
+            </div>
+            <div class="province-chips">
+                ${allProvinces.map(p => `
+                    <span class="province-chip ${analysis.provinces_covered.includes(p) ? 'covered' : 'missing'}">
+                        ${analysis.provinces_covered.includes(p) ? '✓' : '✗'} ${p}
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+        
+        <div class="analysis-section">
+            <strong>${analysis.datasets_with_wfs} von ${analysis.total_datasets} haben WFS</strong>
+            ${analysis.combinable ? 
+                '<span style="color: var(--success); margin-left: 1rem;">✓ Kombinierbar!</span>' : 
+                '<span style="color: var(--warning); margin-left: 1rem;">⚠ Eingeschränkt kombinierbar</span>'
+            }
+        </div>
+        
+        ${analysis.common_fields.length > 0 ? `
+        <div class="analysis-section" style="margin-top: 1rem;">
+            <strong>Gemeinsame Felder (${analysis.common_fields.length}):</strong>
+            <div class="field-list">
+                ${analysis.common_fields.slice(0, 15).map(f => `<span class="field-chip">${f}</span>`).join('')}
+                ${analysis.common_fields.length > 15 ? `<span class="field-chip">+${analysis.common_fields.length - 15} mehr</span>` : ''}
+            </div>
+        </div>
+        ` : ''}
+        
+        ${analysis.field_mappings.length > 0 ? `
+        <div class="analysis-section" style="margin-top: 1rem;">
+            <strong>Feld-Mappings:</strong>
+            <table style="width: 100%; margin-top: 0.5rem; font-size: 0.85rem;">
+                ${analysis.field_mappings.slice(0, 8).map(fm => `
+                    <tr>
+                        <td style="font-family: monospace; color: var(--accent);">${fm.field}</td>
+                        <td>→</td>
+                        <td>${fm.canonical}</td>
+                        <td style="color: var(--text-muted);">${fm.description}</td>
+                    </tr>
+                `).join('')}
+            </table>
+        </div>
+        ` : ''}
+        
+        ${data.combination_prompt ? `
+        <div class="analysis-section" style="margin-top: 1rem;">
+            <strong>Shelley Prompt für Kombination:</strong>
+            <div class="combination-prompt">${escapeHtml(data.combination_prompt)}</div>
+            <button class="copy-btn" onclick="copyText(document.querySelector('.combination-prompt').innerText)">
+                📋 Prompt kopieren
+            </button>
+        </div>
+        ` : ''}
+        
+        <div class="analysis-section" style="margin-top: 1rem;">
+            <strong>WFS-Endpunkte:</strong>
+            ${data.wfs_services.map(svc => `
+                <div style="margin: 0.5rem 0; padding: 0.5rem; background: var(--bg); border-radius: 4px;">
+                    <div><strong>${svc.province || 'National'}</strong>: ${svc.title}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); word-break: break-all;">${svc.url}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    panel.style.display = 'block';
+}
+
+function closeCombinationPanel() {
+    document.getElementById('combination-panel').style.display = 'none';
+}
+
+function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = '✓ Kopiert!';
+        setTimeout(() => btn.textContent = orig, 2000);
+    });
+}
+
+async function smartSearch() {
+    const q = document.getElementById('search-input').value;
+    if (!q) return;
+    
+    const res = await fetch(`/api/smart-search?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    
+    // Show concept matches
+    const conceptsEl = document.getElementById('concept-matches');
+    const groupsEl = document.getElementById('combinable-groups');
+    const smartEl = document.getElementById('smart-results');
+    
+    if (data.matched_concepts.length > 0 || data.combinable_groups.length > 0) {
+        smartEl.style.display = 'block';
+        
+        // Concepts
+        if (data.matched_concepts.length > 0) {
+            conceptsEl.innerHTML = data.matched_concepts.map(c => `
+                <div class="concept-card" onclick="searchByConcept('${c.id}')">
+                    <h4>${c.name_de}</h4>
+                    <div class="stats">
+                        ${c.datasets} Datensätze • ${c.provinces} Bundesländer • ${c.wfs_count} WFS
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            conceptsEl.innerHTML = '';
+        }
+        
+        // Combinable groups
+        if (data.combinable_groups.length > 0) {
+            groupsEl.innerHTML = `
+                <h4>🔗 Kombinierbare Datensätze gefunden!</h4>
+                <div>
+                    ${data.combinable_groups.map(g => `
+                        <div class="combinable-group" onclick="showCombineForConcept('${g.concept}')">
+                            <span class="name">${g.name}</span>
+                            <span class="info">${g.provinces.length} Bundesländer • ${g.wfs_count} WFS</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            groupsEl.innerHTML = '';
+        }
+    } else {
+        smartEl.style.display = 'none';
+    }
+}
+
+function searchByConcept(conceptId) {
+    state.filters.topic = conceptId;
+    document.querySelectorAll('.topic-tag').forEach(t => {
+        t.classList.toggle('active', t.dataset.topic === conceptId);
+    });
+    state.offset = 0;
+    search();
+}
+
+async function showCombineForConcept(conceptId) {
+    const res = await fetch(`/api/combine?concept=${encodeURIComponent(conceptId)}`);
+    const data = await res.json();
+    showCombinationPanel(data);
 }
 
 function escapeHtml(text) {

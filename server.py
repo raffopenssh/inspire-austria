@@ -89,6 +89,10 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.handle_schema(query)
         elif path == '/api/fields':
             self.handle_fields(query)
+        elif path == '/api/combine':
+            self.handle_combine(query)
+        elif path == '/api/smart-search':
+            self.handle_smart_search(query)
         else:
             self.send_error(404)
     
@@ -726,6 +730,292 @@ class InspireHandler(BaseHTTPRequestHandler):
             
             conn.close()
             self.send_json({'fields': fields})
+    
+    def handle_combine(self, query):
+        """Analyze how to combine datasets across provinces."""
+        concept_id = query.get('concept', [None])[0]
+        ids = query.get('ids', [''])[0].split(',')
+        ids = [i.strip() for i in ids if i.strip()]
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        if concept_id:
+            # Get all datasets for this concept with their schemas
+            cur.execute('''
+                SELECT d.id, d.title, d.province, d.gem_score,
+                       ft.type_name, ft.inspire_theme,
+                       GROUP_CONCAT(DISTINCT s.service_type) as services,
+                       GROUP_CONCAT(DISTINCT f.field_name) as fields
+                FROM dataset_concepts dc
+                JOIN datasets d ON dc.dataset_id = d.id
+                LEFT JOIN wfs_feature_types ft ON d.id = ft.dataset_id
+                LEFT JOIN wfs_fields f ON ft.id = f.feature_type_id
+                LEFT JOIN dataset_services s ON d.id = s.dataset_id
+                WHERE dc.concept_id = ?
+                GROUP BY d.id
+                ORDER BY d.gem_score DESC
+            ''', (concept_id,))
+        elif ids:
+            placeholders = ','.join('?' * len(ids))
+            cur.execute(f'''
+                SELECT d.id, d.title, d.province, d.gem_score,
+                       ft.type_name, ft.inspire_theme,
+                       GROUP_CONCAT(DISTINCT s.service_type) as services,
+                       GROUP_CONCAT(DISTINCT f.field_name) as fields
+                FROM datasets d
+                LEFT JOIN wfs_feature_types ft ON d.id = ft.dataset_id
+                LEFT JOIN wfs_fields f ON ft.id = f.feature_type_id
+                LEFT JOIN dataset_services s ON d.id = s.dataset_id
+                WHERE d.id IN ({placeholders})
+                GROUP BY d.id
+            ''', ids)
+        else:
+            conn.close()
+            self.send_json({'error': 'concept or ids required'})
+            return
+        
+        rows = cur.fetchall()
+        
+        # Analyze compatibility
+        datasets = []
+        all_fields = set()
+        field_counts = {}  # Count how often each field appears
+        provinces_covered = set()
+        has_wfs = []
+        datasets_with_fields = 0
+        
+        for row in rows:
+            ds_id, title, province, gem, type_name, theme, services, fields = row
+            field_set = set(fields.split(',')) if fields else set()
+            svc_set = set(services.split(',')) if services else set()
+            
+            all_fields.update(field_set)
+            if field_set:
+                datasets_with_fields += 1
+                for f in field_set:
+                    field_counts[f] = field_counts.get(f, 0) + 1
+            
+            if province:
+                provinces_covered.add(province)
+            
+            # Get WFS URL if available
+            wfs_url = None
+            if 'WFS' in svc_set:
+                cur.execute('''
+                    SELECT url FROM dataset_services 
+                    WHERE dataset_id = ? AND service_type = 'WFS' LIMIT 1
+                ''', (ds_id,))
+                wfs_row = cur.fetchone()
+                if wfs_row:
+                    wfs_url = wfs_row[0]
+                    has_wfs.append({'id': ds_id, 'title': title, 'province': province, 'url': wfs_url, 'fields': list(field_set)})
+            
+            datasets.append({
+                'id': ds_id,
+                'title': title,
+                'province': province or 'National',
+                'gem_score': gem,
+                'type_name': type_name,
+                'theme': theme,
+                'services': list(svc_set),
+                'fields': list(field_set),
+                'wfs_url': wfs_url
+            })
+        
+        # Common fields = fields appearing in at least 50% of datasets with schemas
+        threshold = max(2, datasets_with_fields * 0.5)
+        common_fields = set(f for f, count in field_counts.items() if count >= threshold)
+        
+        # Calculate coverage
+        all_provinces = {'Wien', 'Niederösterreich', 'Oberösterreich', 'Salzburg', 
+                        'Tirol', 'Vorarlberg', 'Kärnten', 'Steiermark', 'Burgenland'}
+        missing_provinces = all_provinces - provinces_covered
+        
+        # Get canonical field mappings for common fields
+        field_mappings = []
+        for field in (common_fields or []):
+            cur.execute('''
+                SELECT cf.id, cf.description_de
+                FROM field_synonyms fs
+                JOIN canonical_fields cf ON fs.canonical_id = cf.id
+                WHERE LOWER(fs.field_name) = LOWER(?)
+            ''', (field,))
+            mapping = cur.fetchone()
+            if mapping:
+                field_mappings.append({'field': field, 'canonical': mapping[0], 'description': mapping[1]})
+        
+        conn.close()
+        
+        # Generate combination advice
+        combinable = len(has_wfs) >= 2
+        
+        result = {
+            'concept': concept_id,
+            'datasets': datasets,
+            'analysis': {
+                'total_datasets': len(datasets),
+                'provinces_covered': list(provinces_covered),
+                'missing_provinces': list(missing_provinces),
+                'coverage_pct': len(provinces_covered) / len(all_provinces) * 100,
+                'datasets_with_wfs': len(has_wfs),
+                'common_fields': list(common_fields) if common_fields else [],
+                'all_fields': list(all_fields),
+                'field_mappings': field_mappings,
+                'combinable': combinable
+            },
+            'wfs_services': has_wfs
+        }
+        
+        # Generate combination prompt
+        if combinable:
+            result['combination_prompt'] = self.generate_combination_prompt(concept_id, has_wfs, common_fields, field_mappings)
+        
+        self.send_json(result)
+    
+    def generate_combination_prompt(self, concept, wfs_services, common_fields, field_mappings):
+        """Generate a Shelley prompt for combining datasets."""
+        lines = [f"Kombiniere folgende {concept}-Datensätze zu einem österreichweiten Datensatz:\n"]
+        
+        for svc in wfs_services[:6]:  # Limit to 6
+            lines.append(f"**{svc['title']}** ({svc['province'] or 'National'})")
+            lines.append(f"  WFS: {svc['url']}")
+            if svc.get('fields'):
+                lines.append(f"  Felder: {', '.join(svc['fields'][:8])}")
+        
+        if common_fields:
+            lines.append(f"\n**Gemeinsame/ähnliche Felder:** {', '.join(list(common_fields)[:10])}")
+        
+        if field_mappings:
+            lines.append("\n**Kanonische Feldnamen (für Vereinheitlichung):**")
+            for fm in field_mappings[:8]:
+                lines.append(f"  - {fm['field']} → {fm['canonical']} ({fm['description']})")
+        
+        lines.append("\n**Aufgabe:**")
+        lines.append("1. Lade alle WFS-Daten mit OWSLib oder requests als GeoDataFrames")
+        lines.append("2. Prüfe die Spaltennamen jedes DataFrames")
+        lines.append("3. Mappe auf gemeinsame Spaltennamen (siehe Feldmappings)")
+        lines.append("4. Füge 'bundesland' Spalte hinzu")
+        lines.append("5. Kombiniere mit gpd.pd.concat()")
+        lines.append("6. Exportiere als GeoPackage: combined.to_file('output.gpkg', driver='GPKG')")
+        
+        return '\n'.join(lines)
+    
+    def handle_smart_search(self, query):
+        """Enhanced search with concept grouping and combination suggestions."""
+        q = query.get('q', [''])[0]
+        
+        if not q:
+            self.send_json({'error': 'query required'})
+            return
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Find matching concepts
+        q_lower = q.lower()
+        matched_concepts = []
+        
+        cur.execute('SELECT id, name_de, name_en FROM concepts')
+        for cid, name_de, name_en in cur.fetchall():
+            if q_lower in name_de.lower() or q_lower in name_en.lower() or q_lower in cid:
+                # Get stats for this concept
+                cur.execute('''
+                    SELECT COUNT(DISTINCT d.id), COUNT(DISTINCT d.province),
+                           SUM(CASE WHEN s.service_type = 'WFS' THEN 1 ELSE 0 END)
+                    FROM dataset_concepts dc
+                    JOIN datasets d ON dc.dataset_id = d.id
+                    LEFT JOIN dataset_services s ON d.id = s.dataset_id
+                    WHERE dc.concept_id = ?
+                ''', (cid,))
+                stats = cur.fetchone()
+                
+                matched_concepts.append({
+                    'id': cid,
+                    'name_de': name_de,
+                    'name_en': name_en,
+                    'datasets': stats[0],
+                    'provinces': stats[1],
+                    'wfs_count': stats[2] or 0
+                })
+        
+        # FTS search for datasets
+        cur.execute('''
+            SELECT d.id, d.title, d.province, d.gem_score, d.type,
+                   GROUP_CONCAT(DISTINCT dc.concept_id) as concepts,
+                   GROUP_CONCAT(DISTINCT s.service_type) as services
+            FROM datasets d
+            JOIN datasets_fts fts ON d.id = fts.id
+            LEFT JOIN dataset_concepts dc ON d.id = dc.dataset_id
+            LEFT JOIN dataset_services s ON d.id = s.dataset_id
+            WHERE datasets_fts MATCH ?
+            GROUP BY d.id
+            ORDER BY d.gem_score DESC
+            LIMIT 50
+        ''', (q,))
+        
+        datasets = []
+        by_concept = {}
+        by_province = {}
+        
+        for row in cur.fetchall():
+            ds_id, title, province, gem, dtype, concepts, services = row
+            concept_list = concepts.split(',') if concepts else []
+            service_list = services.split(',') if services else []
+            
+            ds = {
+                'id': ds_id,
+                'title': title,
+                'province': province or 'National',
+                'gem_score': gem,
+                'type': dtype,
+                'concepts': concept_list,
+                'services': service_list,
+                'has_wfs': 'WFS' in service_list
+            }
+            datasets.append(ds)
+            
+            # Group by concept
+            for c in concept_list:
+                if c not in by_concept:
+                    by_concept[c] = []
+                by_concept[c].append(ds)
+            
+            # Group by province
+            prov = province or 'National'
+            if prov not in by_province:
+                by_province[prov] = []
+            by_province[prov].append(ds)
+        
+        # Find combinable groups (same concept, multiple provinces, have WFS)
+        combinable_groups = []
+        for concept_id, ds_list in by_concept.items():
+            provinces = set(d['province'] for d in ds_list)
+            wfs_count = sum(1 for d in ds_list if d['has_wfs'])
+            
+            if len(provinces) >= 2 and wfs_count >= 2:
+                cur.execute('SELECT name_de FROM concepts WHERE id = ?', (concept_id,))
+                name_row = cur.fetchone()
+                
+                combinable_groups.append({
+                    'concept': concept_id,
+                    'name': name_row[0] if name_row else concept_id,
+                    'provinces': list(provinces),
+                    'dataset_count': len(ds_list),
+                    'wfs_count': wfs_count,
+                    'datasets': [d['id'] for d in ds_list if d['has_wfs']][:5]
+                })
+        
+        conn.close()
+        
+        self.send_json({
+            'query': q,
+            'matched_concepts': matched_concepts,
+            'datasets': datasets,
+            'by_province': {k: len(v) for k, v in by_province.items()},
+            'combinable_groups': combinable_groups,
+            'total': len(datasets)
+        })
     
     def log_message(self, format, *args):
         print(f"[{self.client_address[0]}] {args[0]}")
