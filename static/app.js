@@ -44,8 +44,6 @@ const topicLabels = {
 
 async function init() {
     // Load random gems
-    await loadGems();
-    
     // Event listeners
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('keypress', e => {
@@ -91,96 +89,7 @@ async function init() {
     }
 }
 
-let currentGemIndex = 0;
-let gemsData = [];
 
-async function loadGems() {
-    // Load both top combinable concepts and individual gems
-    const [gemsRes, conceptsRes] = await Promise.all([
-        fetch('/api/gems?random=true&limit=10'),
-        fetch('/api/concepts')
-    ]);
-    const gemsResult = await gemsRes.json();
-    const conceptsResult = await conceptsRes.json();
-    
-    const highlights = [];
-    
-    // Top 3 combinable concepts (those with most WFS coverage)
-    const topConcepts = (conceptsResult.concepts || [])
-        .filter(c => c.wfs_count >= 5 && c.provinces >= 5)
-        .sort((a, b) => (b.wfs_count * b.provinces) - (a.wfs_count * a.provinces))
-        .slice(0, 3);
-    
-    topConcepts.forEach(c => {
-        highlights.push({
-            type: 'concept',
-            id: c.id,
-            title: c.name_de,
-            subtitle: `${c.datasets} Datensätze aus ${c.provinces} Bundesländern kombinierbar`,
-            score: c.wfs_count
-        });
-    });
-    
-    // Top individual gems
-    const topGems = (gemsResult.gems || []).slice(0, 4);
-    topGems.forEach(g => {
-        highlights.push({
-            type: 'dataset',
-            id: g.id,
-            title: g.title,
-            subtitle: g.province ? `Hochauflösende Daten aus ${g.province}` : 'Österreichweiter Datensatz mit WFS-Zugang',
-            score: g.score
-        });
-    });
-    
-    gemsData = highlights;
-    if (highlights.length === 0) {
-        document.getElementById('gems-list').innerHTML = '<p class="text-muted">Keine Highlights verfügbar</p>';
-        return;
-    }
-    
-    renderCurrentGem();
-    
-    // Rotate gems every 5 seconds
-    if (highlights.length > 1) {
-        setInterval(rotateGems, 5000);
-    }
-}
-
-function renderCurrentGem() {
-    const container = document.getElementById('gems-list');
-    const gem = gemsData[currentGemIndex];
-    if (!gem) return;
-    
-    const icon = gem.type === 'concept' ? '#' : '◆';
-    
-    container.innerHTML = `
-        <div class="gem-card active" data-id="${gem.id}" data-type="${gem.type}">
-            <span class="gem-badge">${icon}</span>
-            <div class="title">${escapeHtml(gem.title)}</div>
-            <div class="gem-subtitle">${escapeHtml(gem.subtitle)}</div>
-        </div>
-    `;
-    
-    container.querySelector('.gem-card').addEventListener('click', () => {
-        if (gem.type === 'concept') {
-            showCombinationPanel(gem.id);
-        } else {
-            showDetail(gem.id);
-        }
-    });
-}
-
-function rotateGems() {
-    const container = document.getElementById('gems-list');
-    const oldCard = container.querySelector('.gem-card');
-    if (oldCard) oldCard.classList.remove('active');
-    
-    setTimeout(() => {
-        currentGemIndex = (currentGemIndex + 1) % gemsData.length;
-        renderCurrentGem();
-    }, 400);
-}
 
 async function search() {
     // Close any open modals
@@ -188,6 +97,25 @@ async function search() {
     closeCombinationPanel();
     
     state.query = document.getElementById('search-input').value;
+    
+    // Hide summary when searching, show when empty
+    const summarySection = document.getElementById('summary-section');
+    const resultsContainer = document.getElementById('results');
+    const resultsInfo = document.getElementById('results-info');
+    const pagination = document.getElementById('pagination');
+    
+    if (!state.query && !state.filters.concept) {
+        // No search - show summary, hide results
+        summarySection.classList.remove('hidden');
+        resultsContainer.innerHTML = '';
+        resultsInfo.textContent = '';
+        pagination.innerHTML = '';
+        document.getElementById('smart-results').style.display = 'none';
+        return;
+    }
+    
+    // Has search - hide summary
+    summarySection.classList.add('hidden');
     
     // Also run smart search for concept matching
     if (state.query) {
