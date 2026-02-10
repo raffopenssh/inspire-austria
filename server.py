@@ -85,6 +85,10 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.handle_coverage(query)
         elif path == '/api/validation':
             self.handle_validation()
+        elif path == '/api/schema':
+            self.handle_schema(query)
+        elif path == '/api/fields':
+            self.handle_fields(query)
         else:
             self.send_error(404)
     
@@ -617,6 +621,111 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.send_json(results)
         except FileNotFoundError:
             self.send_json({'error': 'No validation results yet'})
+    
+    def handle_schema(self, query):
+        """Get schema info for a dataset."""
+        dataset_id = query.get('id', [None])[0]
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        if dataset_id:
+            cur.execute('''
+                SELECT ft.type_name, ft.inspire_theme, f.field_name, f.field_type, f.is_geometry
+                FROM wfs_feature_types ft
+                LEFT JOIN wfs_fields f ON ft.id = f.feature_type_id
+                WHERE ft.dataset_id = ?
+            ''', (dataset_id,))
+            
+            rows = cur.fetchall()
+            if not rows:
+                self.send_json({'error': 'No schema found'})
+                return
+            
+            feature_types = {}
+            for type_name, theme, field_name, field_type, is_geom in rows:
+                if type_name not in feature_types:
+                    feature_types[type_name] = {
+                        'name': type_name,
+                        'theme': theme,
+                        'fields': []
+                    }
+                if field_name:
+                    feature_types[type_name]['fields'].append({
+                        'name': field_name,
+                        'type': field_type,
+                        'is_geometry': bool(is_geom)
+                    })
+            
+            conn.close()
+            self.send_json({'feature_types': list(feature_types.values())})
+        else:
+            # Return schema statistics
+            cur.execute('SELECT COUNT(*) FROM wfs_feature_types')
+            ft_count = cur.fetchone()[0]
+            cur.execute('SELECT COUNT(*) FROM wfs_fields')
+            field_count = cur.fetchone()[0]
+            cur.execute('SELECT inspire_theme, COUNT(*) FROM wfs_feature_types WHERE inspire_theme IS NOT NULL GROUP BY inspire_theme')
+            themes = dict(cur.fetchall())
+            
+            conn.close()
+            self.send_json({
+                'feature_types': ft_count,
+                'fields': field_count,
+                'themes': themes
+            })
+    
+    def handle_fields(self, query):
+        """Get canonical field mappings."""
+        field_name = query.get('name', [None])[0]
+        theme = query.get('theme', [None])[0]
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        if field_name:
+            # Look up canonical field
+            cur.execute('''
+                SELECT cf.id, cf.type, cf.description_de, cf.description_en, fs.source
+                FROM field_synonyms fs
+                JOIN canonical_fields cf ON fs.canonical_id = cf.id
+                WHERE LOWER(fs.field_name) = LOWER(?)
+            ''', (field_name,))
+            
+            row = cur.fetchone()
+            if row:
+                # Get all synonyms
+                cur.execute('SELECT source, field_name FROM field_synonyms WHERE canonical_id = ?', (row[0],))
+                synonyms = cur.fetchall()
+                
+                conn.close()
+                self.send_json({
+                    'canonical_id': row[0],
+                    'type': row[1],
+                    'description_de': row[2],
+                    'description_en': row[3],
+                    'synonyms': [{'source': s[0], 'name': s[1]} for s in synonyms]
+                })
+            else:
+                conn.close()
+                self.send_json({'error': 'Field not found'})
+        else:
+            # Return all canonical fields
+            cur.execute('SELECT id, type, description_de, description_en FROM canonical_fields')
+            fields = []
+            for row in cur.fetchall():
+                cur.execute('SELECT source, field_name FROM field_synonyms WHERE canonical_id = ?', (row[0],))
+                synonyms = cur.fetchall()
+                fields.append({
+                    'id': row[0],
+                    'type': row[1],
+                    'description_de': row[2],
+                    'description_en': row[3],
+                    'synonyms': [{'source': s[0], 'name': s[1]} for s in synonyms]
+                })
+            
+            conn.close()
+            self.send_json({'fields': fields})
     
     def log_message(self, format, *args):
         print(f"[{self.client_address[0]}] {args[0]}")
