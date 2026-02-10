@@ -126,14 +126,18 @@ function renderTopics(topics) {
     });
 }
 
+let currentGemIndex = 0;
+let gemsData = [];
+
 async function loadGems() {
-    const res = await fetch('/api/gems?random=true&limit=6');
+    const res = await fetch('/api/gems?random=true&limit=8');
     const data = await res.json();
+    gemsData = data.gems;
     
     const container = document.getElementById('gems-list');
-    container.innerHTML = data.gems.map(gem => `
-        <div class="gem-card" data-id="${gem.id}">
-            <span class="gem-badge">💎 Gem</span>
+    container.innerHTML = gemsData.map((gem, i) => `
+        <div class="gem-card ${i === 0 ? 'active' : ''}" data-id="${gem.id}" data-index="${i}">
+            <span class="gem-badge">*</span>
             <div class="title">${escapeHtml(gem.title)}</div>
             <div class="meta">${gem.province || 'Österreich'}</div>
         </div>
@@ -142,6 +146,20 @@ async function loadGems() {
     container.querySelectorAll('.gem-card').forEach(card => {
         card.addEventListener('click', () => showDetail(card.dataset.id));
     });
+    
+    // Start rotation
+    if (gemsData.length > 1) {
+        setInterval(rotateGems, 4000);
+    }
+}
+
+function rotateGems() {
+    const cards = document.querySelectorAll('.gem-card');
+    if (cards.length === 0) return;
+    
+    cards[currentGemIndex].classList.remove('active');
+    currentGemIndex = (currentGemIndex + 1) % cards.length;
+    cards[currentGemIndex].classList.add('active');
 }
 
 async function search() {
@@ -200,19 +218,19 @@ function renderResults(results) {
                  data-id="${r.id}" data-index="${idx}">
                 <div class="checkbox"></div>
                 <span class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite('${r.id}', event)" title="Favorit">
-                    ${isFavorite ? '★' : '☆'}
+                    ${isFavorite ? '*' : '-'}
                 </span>
                 <div class="title">
                     <a href="#" onclick="showDetail('${r.id}'); return false;">
                         ${escapeHtml(r.title)}
                     </a>
-                    ${r.gem_score >= 8 ? '<span class="gem-badge">💎</span>' : ''}
+                    ${r.gem_score >= 8 ? '<span class="gem-badge">*</span>' : ''}
                 </div>
                 <div class="abstract">${escapeHtml(r.abstract)}</div>
                 <div class="meta">
                     <span class="badge type-${r.type}">${typeLabel(r.type)}</span>
-                    ${r.province ? `<span class="badge">📍 ${r.province}</span>` : ''}
-                    ${r.org ? `<span class="badge">🏢 ${escapeHtml(r.org)}</span>` : ''}
+                    ${r.province ? `<span class="badge">${r.province}</span>` : ''}
+                    ${r.org ? `<span class="badge">${escapeHtml(r.org)}</span>` : ''}
                     <div class="service-badges">
                         ${serviceTypes.map(s => `<span class="service-badge ${s.toLowerCase().replace('-', '')}">${s}</span>`).join('')}
                     </div>
@@ -340,7 +358,7 @@ async function showDetail(id) {
     
     content.innerHTML = `
         <h2>${escapeHtml(data.title)}</h2>
-        ${data.gem_score >= 8 ? '<span class="gem-badge">💎 Hochwertiger Datensatz</span>' : ''}
+        ${data.gem_score >= 8 ? '<span class="gem-badge">* Hochwertig</span>' : ''}
         
         <div class="section">
             <h4>Beschreibung</h4>
@@ -392,7 +410,7 @@ async function showDetail(id) {
         ` : ''}
         
         <div class="section">
-            <a href="${data.inspire_url}" target="_blank" class="action-btn">🔗 Im INSPIRE Portal öffnen</a>
+            <a href="${data.inspire_url}" target="_blank" class="action-btn">-> INSPIRE Portal</a>
         </div>
     `;
     
@@ -503,7 +521,7 @@ function showCombinationPanel(data) {
             <div class="province-chips">
                 ${allProvinces.map(p => `
                     <span class="province-chip ${analysis.provinces_covered.includes(p) ? 'covered' : 'missing'}">
-                        ${analysis.provinces_covered.includes(p) ? '✓' : '✗'} ${p}
+                        ${analysis.provinces_covered.includes(p) ? '+' : '-'} ${p}
                     </span>
                 `).join('')}
             </div>
@@ -512,8 +530,8 @@ function showCombinationPanel(data) {
         <div class="analysis-section">
             <strong>${analysis.datasets_with_wfs} von ${analysis.total_datasets} haben WFS</strong>
             ${analysis.combinable ? 
-                '<span style="color: var(--success); margin-left: 1rem;">✓ Kombinierbar!</span>' : 
-                '<span style="color: var(--warning); margin-left: 1rem;">⚠ Eingeschränkt kombinierbar</span>'
+                '<span style="color: var(--success); margin-left: 1rem;">[ok] Kombinierbar</span>' : 
+                '<span style="color: var(--warning); margin-left: 1rem;">[!] Eingeschr\u00e4nkt</span>'
             }
         </div>
         
@@ -548,7 +566,7 @@ function showCombinationPanel(data) {
             <strong>Shelley Prompt für Kombination:</strong>
             <div class="combination-prompt">${escapeHtml(data.combination_prompt)}</div>
             <button class="copy-btn" onclick="copyText(document.querySelector('.combination-prompt').innerText)">
-                📋 Prompt kopieren
+                [+] Prompt kopieren
             </button>
         </div>
         ` : ''}
@@ -612,12 +630,12 @@ async function smartSearch() {
         // Combinable groups
         if (data.combinable_groups.length > 0) {
             groupsEl.innerHTML = `
-                <h4>🔗 Kombinierbare Datensätze gefunden!</h4>
+                <h4># Kombinierbare Datensätze</h4>
                 <div>
                     ${data.combinable_groups.map(g => `
                         <div class="combinable-group" onclick="showCombineForConcept('${g.concept}')">
                             <span class="name">${g.name}</span>
-                            <span class="info">${g.provinces.length} Bundesländer • ${g.wfs_count} WFS</span>
+                            <span class="info">${g.provinces.length} Bundesl. / ${g.wfs_count} WFS</span>
                         </div>
                     `).join('')}
                 </div>

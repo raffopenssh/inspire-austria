@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INSPIRE Österreich Suche</title>
+    <title>INSPIRE Österreich</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🌿 INSPIRE Österreich</h1>
-            <p class="subtitle">Entdecke österreichische Geodaten - einfach durchsuchbar</p>
+            <h1>INSPIRE Österreich _</h1>
+            <p class="subtitle">Geodaten durchsuchbar</p>
         </header>
         
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="Suche nach Grundwasser, Wald, Kataster, Hochwasser..." autofocus>
-            <button id="search-btn">🔍</button>
+            <input type="text" id="search-input" placeholder="Grundwasser, Wald, Kataster..." autofocus>
+            <button id="search-btn">→</button>
         </div>
         
         <div class="filters">
@@ -39,37 +39,32 @@
             </select>
             <select id="filter-service">
                 <option value="">Alle Services</option>
-                <option value="WFS">WFS (Vektor)</option>
-                <option value="WMS">WMS (Karte)</option>
+                <option value="WFS">WFS</option>
+                <option value="WMS">WMS</option>
                 <option value="OGC-API">OGC API</option>
                 <option value="Download">Download</option>
-                <option value="ATOM">ATOM Feed</option>
             </select>
-            <button id="favorites-btn" class="filter-btn">★ Favoriten (<span id="favorites-count">0</span>)</button>
+            <button id="favorites-btn" class="filter-btn">* Favoriten (<span id="favorites-count">0</span>)</button>
         </div>
         
-        <div class="topics-bar" id="topics-bar">
-            <!-- Topic tags loaded dynamically -->
-        </div>
+        <div class="topics-bar" id="topics-bar"></div>
         
         <div class="gems-section" id="gems-section">
-            <h3>💎 Entdecke Datensätze</h3>
-            <div class="gems-list" id="gems-list">
-                <!-- Gems loaded dynamically -->
-            </div>
+            <h3>> Entdecken</h3>
+            <div class="gems-list" id="gems-list"></div>
         </div>
         
         <div class="selection-bar" id="selection-bar" style="display: none;">
             <span id="selection-count">0 ausgewählt</span>
-            <button id="analyze-btn">🔍 Kombinierbarkeit prüfen</button>
-            <button id="copy-prompt-btn">📋 Shelley Prompt kopieren</button>
-            <button id="clear-selection-btn">✕ Auswahl aufheben</button>
+            <button id="analyze-btn">[?] Prüfen</button>
+            <button id="copy-prompt-btn">[+] Prompt</button>
+            <button id="clear-selection-btn">x</button>
         </div>
         
         <div class="combination-panel" id="combination-panel" style="display: none;">
             <div class="combination-header">
-                <h3>🔗 Datensatz-Kombination</h3>
-                <button class="close-panel" onclick="closeCombinationPanel()">✕</button>
+                <h3># Datensatz-Kombination</h3>
+                <button class="close-panel" onclick="closeCombinationPanel()">x</button>
             </div>
             <div id="combination-content"></div>
         </div>
@@ -81,22 +76,20 @@
         
         <div class="results-info" id="results-info"></div>
         
-        <div class="results" id="results">
-            <!-- Search results loaded here -->
-        </div>
+        <div class="results" id="results"></div>
         
         <div class="pagination" id="pagination"></div>
         
         <div class="modal" id="detail-modal">
             <div class="modal-content">
-                <span class="close-btn">&times;</span>
+                <span class="close-btn">x</span>
                 <div id="detail-content"></div>
             </div>
         </div>
         
         <footer>
             <p>Daten: <a href="https://geometadatensuche.inspire.gv.at" target="_blank">INSPIRE Geoportal Österreich</a></p>
-            <p>API: <code>/api/llm?action=help</code> für LLM-optimierten Zugriff</p>
+            <p>API: <code>/api/llm?action=help</code></p>
         </footer>
     </div>
     
