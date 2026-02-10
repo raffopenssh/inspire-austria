@@ -109,26 +109,31 @@ class InspireHandler(BaseHTTPRequestHandler):
         province_filter = query.get('province', [None])[0]
         topic_filter = query.get('topic', [None])[0]
         service_filter = query.get('service', [None])[0]
+        concept_filter = query.get('concept', [None])[0]
         
         conn = get_db()
         cur = conn.cursor()
         
         if q:
             # FTS search with ranking - use prefix matching for partial words
-            # Add * suffix for prefix matching, handle multiple words
-            search_terms = q.strip().split()
-            fts_query = ' '.join(f'"{term}"*' for term in search_terms if term)
+            # Remove special chars like "/" that break FTS, add * suffix for prefix matching
+            import re
+            clean_q = re.sub(r'[/\\\-]', ' ', q)  # Replace slashes with spaces
+            search_terms = clean_q.strip().split()
+            search_terms = [t for t in search_terms if t and len(t) > 1]  # Filter empty and single chars
             
-            sql = '''
-                SELECT d.*, fts.rank
-                FROM datasets d
-                JOIN datasets_fts fts ON d.id = fts.id
-                WHERE datasets_fts MATCH ?
-            '''
-            params = [fts_query]
-            
-            # Also do a fallback LIKE search for edge cases
-            if not fts_query:
+            if search_terms:
+                fts_query = ' '.join(f'"{term}"*' for term in search_terms)
+                
+                sql = '''
+                    SELECT d.*, fts.rank
+                    FROM datasets d
+                    JOIN datasets_fts fts ON d.id = fts.id
+                    WHERE datasets_fts MATCH ?
+                '''
+                params = [fts_query]
+            else:
+                # Fallback LIKE search for edge cases
                 sql = '''
                     SELECT d.*, 0 as rank FROM datasets d
                     WHERE LOWER(d.title) LIKE ? OR LOWER(d.abstract) LIKE ?
@@ -153,6 +158,10 @@ class InspireHandler(BaseHTTPRequestHandler):
         if service_filter:
             sql += ' AND d.id IN (SELECT dataset_id FROM dataset_services WHERE service_type = ?)'
             params.append(service_filter)
+        
+        if concept_filter:
+            sql += ' AND d.id IN (SELECT dataset_id FROM dataset_concepts WHERE concept_id = ?)'
+            params.append(concept_filter)
         
         # Count total
         count_sql = f'SELECT COUNT(*) FROM ({sql})'

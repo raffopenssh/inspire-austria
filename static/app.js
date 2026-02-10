@@ -9,7 +9,8 @@ const state = {
         type: '',
         province: '',
         service: '',
-        topic: ''
+        topic: '',
+        concept: null
     },
     selected: new Set(),
     lastClickedIndex: null,
@@ -196,11 +197,12 @@ async function search() {
     }
     
     const params = new URLSearchParams();
-    if (state.query) params.set('q', state.query);
+    if (state.query && !state.filters.concept) params.set('q', state.query);
     if (state.filters.type) params.set('type', state.filters.type);
     if (state.filters.province) params.set('province', state.filters.province);
     if (state.filters.service) params.set('service', state.filters.service);
     if (state.filters.topic) params.set('topic', state.filters.topic);
+    if (state.filters.concept) params.set('concept', state.filters.concept);
     params.set('limit', state.limit);
     params.set('offset', state.offset);
     
@@ -994,8 +996,11 @@ function selectAutocompleteItem(item) {
     if (type === 'combine') {
         showCombinationPanel(id);
     } else if (type === 'concept') {
+        // Search by concept ID, not text
+        state.filters.concept = id;
         document.getElementById('search-input').value = item.querySelector('.ac-item-text').textContent;
         search();
+        state.filters.concept = null;  // Reset after search
     } else if (type === 'dataset') {
         showDetail(id);
     } else if (type === 'field') {
