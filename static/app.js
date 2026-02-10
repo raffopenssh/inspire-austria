@@ -61,6 +61,7 @@ async function init() {
     });
     
     document.getElementById('favorites-btn').addEventListener('click', toggleFavoritesFilter);
+    document.getElementById('browse-btn').addEventListener('click', openBrowseModal);
     updateFavoritesCount();
     
     // Check URL params
@@ -742,12 +743,124 @@ function truncateUrl(url) {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') {
+        closeModal();
+        closeBrowseModal();
+    }
     if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
         e.preventDefault();
         document.getElementById('search-input').focus();
     }
 });
+
+// Browse modal
+let browseData = null;
+
+async function openBrowseModal() {
+    const modal = document.getElementById('browse-modal');
+    const statsEl = document.getElementById('browse-stats');
+    const treeEl = document.getElementById('browse-tree');
+    
+    modal.classList.add('open');
+    
+    if (!browseData) {
+        statsEl.textContent = 'Lade Daten...';
+        treeEl.innerHTML = '';
+        
+        const res = await fetch('/api/browse');
+        browseData = await res.json();
+    }
+    
+    renderBrowseTree();
+}
+
+function closeBrowseModal() {
+    document.getElementById('browse-modal').classList.remove('open');
+}
+
+function renderBrowseTree() {
+    const statsEl = document.getElementById('browse-stats');
+    const treeEl = document.getElementById('browse-tree');
+    
+    const s = browseData.stats;
+    statsEl.innerHTML = `${s.total} Datensätze · ${s.concepts} Kategorien · ${s.wfs} mit WFS`;
+    
+    let html = '';
+    
+    // Render concepts
+    for (const concept of browseData.concepts) {
+        html += `
+            <div class="tree-concept" data-id="${concept.id}">
+                <div class="tree-concept-header" onclick="toggleTreeConcept(this)">
+                    <span class="tree-toggle">+</span>
+                    <span class="tree-concept-name">${escapeHtml(concept.name)}</span>
+                    <span class="tree-concept-count">${concept.count}</span>
+                </div>
+                <div class="tree-datasets">
+                    ${concept.datasets.map(ds => renderTreeDataset(ds)).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Render uncategorized if any
+    if (browseData.uncategorized.length > 0) {
+        html += `
+            <div class="tree-concept" data-id="_uncategorized">
+                <div class="tree-concept-header" onclick="toggleTreeConcept(this)">
+                    <span class="tree-toggle">+</span>
+                    <span class="tree-concept-name">Sonstige</span>
+                    <span class="tree-concept-count">${browseData.uncategorized.length}</span>
+                </div>
+                <div class="tree-datasets">
+                    ${browseData.uncategorized.map(ds => renderTreeDataset(ds)).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    treeEl.innerHTML = html;
+}
+
+function renderTreeDataset(ds) {
+    const isFav = state.favorites.has(ds.id);
+    return `
+        <div class="tree-dataset" data-id="${ds.id}">
+            <span class="tree-dataset-star ${isFav ? 'active' : ''}" onclick="toggleTreeFavorite(event, '${ds.id}')">${isFav ? '★' : '☆'}</span>
+            <span class="tree-dataset-title" onclick="showDetail('${ds.id}')">${escapeHtml(ds.title)}</span>
+            <div class="tree-dataset-meta">
+                ${ds.province ? `<span class="tree-province">${ds.province}</span>` : ''}
+                ${ds.wfs ? '<span class="tree-badge wfs">WFS</span>' : ''}
+                ${ds.gem ? '<span class="tree-badge gem">◆</span>' : ''}
+            </div>
+        </div>
+    `;
+}
+
+function toggleTreeConcept(header) {
+    const concept = header.parentElement;
+    const toggle = header.querySelector('.tree-toggle');
+    concept.classList.toggle('open');
+    toggle.textContent = concept.classList.contains('open') ? '−' : '+';
+}
+
+function toggleTreeFavorite(event, id) {
+    event.stopPropagation();
+    
+    if (state.favorites.has(id)) {
+        state.favorites.delete(id);
+    } else {
+        state.favorites.add(id);
+    }
+    saveFavorites();
+    updateFavoritesCount();
+    
+    // Update the star in the tree
+    const star = event.target;
+    const isFav = state.favorites.has(id);
+    star.textContent = isFav ? '★' : '☆';
+    star.classList.toggle('active', isFav);
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', init);

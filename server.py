@@ -87,6 +87,8 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.handle_validation()
         elif path == '/api/schema':
             self.handle_schema(query)
+        elif path == '/api/browse':
+            self.handle_browse()
         elif path == '/api/fields':
             self.handle_fields(query)
         elif path == '/api/combine':
@@ -515,6 +517,108 @@ class InspireHandler(BaseHTTPRequestHandler):
         
         else:
             self.send_json({'error': 'unknown action'}, 400)
+    
+    def handle_browse(self):
+        """Get all datasets organized by concept for browsing."""
+        conn = get_db()
+        cur = conn.cursor()
+        
+        # Get all concepts with their datasets
+        cur.execute('''
+            SELECT c.id, c.name_de, COUNT(DISTINCT dc.dataset_id) as count
+            FROM concepts c
+            LEFT JOIN dataset_concepts dc ON c.id = dc.concept_id
+            GROUP BY c.id
+            ORDER BY count DESC
+        ''')
+        concepts = cur.fetchall()
+        
+        result = {
+            'concepts': [],
+            'uncategorized': [],
+            'stats': {}
+        }
+        
+        total_wfs = 0
+        categorized_ids = set()
+        
+        for concept_id, concept_name, count in concepts:
+            # Get datasets for this concept
+            cur.execute('''
+                SELECT DISTINCT d.id, d.title, d.province, d.gem_score, d.type,
+                       GROUP_CONCAT(DISTINCT s.service_type) as services
+                FROM dataset_concepts dc
+                JOIN datasets d ON dc.dataset_id = d.id
+                LEFT JOIN dataset_services s ON d.id = s.dataset_id
+                WHERE dc.concept_id = ?
+                GROUP BY d.id
+                ORDER BY d.gem_score DESC, d.title
+            ''', (concept_id,))
+            
+            datasets = []
+            for row in cur.fetchall():
+                ds_id, title, province, gem, dtype, services = row
+                svc_list = services.split(',') if services else []
+                has_wfs = 'WFS' in svc_list
+                
+                datasets.append({
+                    'id': ds_id,
+                    'title': title,
+                    'province': province or '',
+                    'gem': gem >= 8,
+                    'type': dtype,
+                    'wfs': has_wfs
+                })
+                
+                categorized_ids.add(ds_id)
+                if has_wfs:
+                    total_wfs += 1
+            
+            if datasets:
+                result['concepts'].append({
+                    'id': concept_id,
+                    'name': concept_name,
+                    'count': len(datasets),
+                    'datasets': datasets
+                })
+        
+        # Get uncategorized datasets
+        cur.execute('''
+            SELECT d.id, d.title, d.province, d.gem_score, d.type,
+                   GROUP_CONCAT(DISTINCT s.service_type) as services
+            FROM datasets d
+            LEFT JOIN dataset_services s ON d.id = s.dataset_id
+            WHERE d.id NOT IN (SELECT dataset_id FROM dataset_concepts)
+            GROUP BY d.id
+            ORDER BY d.gem_score DESC, d.title
+            LIMIT 500
+        ''')
+        
+        for row in cur.fetchall():
+            ds_id, title, province, gem, dtype, services = row
+            svc_list = services.split(',') if services else []
+            has_wfs = 'WFS' in svc_list
+            
+            result['uncategorized'].append({
+                'id': ds_id,
+                'title': title,
+                'province': province or '',
+                'gem': gem >= 8,
+                'type': dtype,
+                'wfs': has_wfs
+            })
+            if has_wfs:
+                total_wfs += 1
+        
+        # Get total counts
+        cur.execute('SELECT COUNT(*) FROM datasets')
+        result['stats']['total'] = cur.fetchone()[0]
+        result['stats']['categorized'] = len(categorized_ids)
+        result['stats']['concepts'] = len(result['concepts'])
+        result['stats']['wfs'] = total_wfs
+        
+        conn.close()
+        self.send_json(result)
     
     def handle_concepts(self, query):
         """Get all concepts with their coverage."""

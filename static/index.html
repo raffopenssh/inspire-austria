@@ -20,6 +20,7 @@
         
         <div class="filters">
             <button id="favorites-btn" class="filter-btn">* Favoriten (<span id="favorites-count">0</span>)</button>
+            <button id="browse-btn" class="filter-btn">≡ Durchsuchen</button>
         </div>
         
         <div class="gems-section" id="gems-section">
@@ -57,6 +58,15 @@
             <div class="modal-content">
                 <span class="close-btn">x</span>
                 <div id="detail-content"></div>
+            </div>
+        </div>
+        
+        <div class="modal" id="browse-modal">
+            <div class="modal-content browse-content">
+                <span class="close-btn" onclick="closeBrowseModal()">x</span>
+                <h2>Alle Datensätze</h2>
+                <div class="browse-stats" id="browse-stats"></div>
+                <div class="browse-tree" id="browse-tree"></div>
             </div>
         </div>
         
