@@ -112,14 +112,26 @@ class InspireHandler(BaseHTTPRequestHandler):
         cur = conn.cursor()
         
         if q:
-            # FTS search with ranking
+            # FTS search with ranking - use prefix matching for partial words
+            # Add * suffix for prefix matching, handle multiple words
+            search_terms = q.strip().split()
+            fts_query = ' '.join(f'"{term}"*' for term in search_terms if term)
+            
             sql = '''
                 SELECT d.*, fts.rank
                 FROM datasets d
                 JOIN datasets_fts fts ON d.id = fts.id
                 WHERE datasets_fts MATCH ?
             '''
-            params = [q]
+            params = [fts_query]
+            
+            # Also do a fallback LIKE search for edge cases
+            if not fts_query:
+                sql = '''
+                    SELECT d.*, 0 as rank FROM datasets d
+                    WHERE LOWER(d.title) LIKE ? OR LOWER(d.abstract) LIKE ?
+                '''
+                params = [f'%{q.lower()}%', f'%{q.lower()}%']
         else:
             sql = 'SELECT d.*, 0 as rank FROM datasets d WHERE 1=1'
             params = []
