@@ -79,6 +79,12 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.handle_prompt(query)
         elif path == '/api/llm':
             self.handle_llm_api(query)
+        elif path == '/api/concepts':
+            self.handle_concepts(query)
+        elif path == '/api/coverage':
+            self.handle_coverage(query)
+        elif path == '/api/validation':
+            self.handle_validation()
         else:
             self.send_error(404)
     
@@ -501,6 +507,116 @@ class InspireHandler(BaseHTTPRequestHandler):
         
         else:
             self.send_json({'error': 'unknown action'}, 400)
+    
+    def handle_concepts(self, query):
+        """Get all concepts with their coverage."""
+        conn = get_db()
+        cur = conn.cursor()
+        
+        cur.execute('''
+            SELECT c.id, c.name_de, c.name_en, c.regional_names,
+                   COUNT(DISTINCT dc.dataset_id) as dataset_count,
+                   COUNT(DISTINCT d.province) as province_count
+            FROM concepts c
+            LEFT JOIN dataset_concepts dc ON c.id = dc.concept_id
+            LEFT JOIN datasets d ON dc.dataset_id = d.id
+            GROUP BY c.id
+            ORDER BY dataset_count DESC
+        ''')
+        
+        concepts = []
+        for row in cur.fetchall():
+            concepts.append({
+                'id': row[0],
+                'name_de': row[1],
+                'name_en': row[2],
+                'regional_names': json.loads(row[3]) if row[3] else {},
+                'dataset_count': row[4],
+                'province_count': row[5]
+            })
+        
+        conn.close()
+        self.send_json({'concepts': concepts})
+    
+    def handle_coverage(self, query):
+        """Get coverage matrix: concept x province."""
+        concept_id = query.get('concept', [None])[0]
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        if concept_id:
+            # Get all datasets for a specific concept, grouped by province
+            cur.execute('''
+                SELECT d.province, d.id, d.title, d.gem_score,
+                       GROUP_CONCAT(DISTINCT s.service_type) as services
+                FROM dataset_concepts dc
+                JOIN datasets d ON dc.dataset_id = d.id
+                LEFT JOIN dataset_services s ON d.id = s.dataset_id
+                WHERE dc.concept_id = ?
+                GROUP BY d.id
+                ORDER BY d.province, d.gem_score DESC
+            ''', (concept_id,))
+            
+            by_province = {}
+            for row in cur.fetchall():
+                province = row[0] or 'National'
+                if province not in by_province:
+                    by_province[province] = []
+                by_province[province].append({
+                    'id': row[1],
+                    'title': row[2],
+                    'gem_score': row[3],
+                    'services': row[4].split(',') if row[4] else []
+                })
+            
+            # Get concept info
+            cur.execute('SELECT name_de, name_en, regional_names FROM concepts WHERE id = ?', (concept_id,))
+            concept_row = cur.fetchone()
+            
+            conn.close()
+            self.send_json({
+                'concept': concept_id,
+                'name_de': concept_row[0] if concept_row else '',
+                'name_en': concept_row[1] if concept_row else '',
+                'regional_names': json.loads(concept_row[2]) if concept_row and concept_row[2] else {},
+                'by_province': by_province
+            })
+        else:
+            # Return coverage matrix
+            cur.execute('''
+                SELECT c.id, c.name_de, d.province, 
+                       COUNT(DISTINCT d.id) as count,
+                       SUM(CASE WHEN s.service_type = 'WFS' THEN 1 ELSE 0 END) > 0 as has_wfs
+                FROM concepts c
+                JOIN dataset_concepts dc ON c.id = dc.concept_id
+                JOIN datasets d ON dc.dataset_id = d.id
+                LEFT JOIN dataset_services s ON d.id = s.dataset_id
+                GROUP BY c.id, d.province
+            ''')
+            
+            matrix = {}
+            for row in cur.fetchall():
+                concept = row[0]
+                if concept not in matrix:
+                    matrix[concept] = {'name': row[1], 'provinces': {}}
+                province = row[2] or 'National'
+                matrix[concept]['provinces'][province] = {
+                    'count': row[3],
+                    'has_wfs': bool(row[4])
+                }
+            
+            conn.close()
+            self.send_json({'matrix': matrix})
+    
+    def handle_validation(self):
+        """Get link validation results."""
+        try:
+            with open('link_validation_results.json') as f:
+                results = json.load(f)
+            self.send_json(results)
+        except FileNotFoundError:
+            self.send_json({'error': 'No validation results yet'})
     
     def log_message(self, format, *args):
         print(f"[{self.client_address[0]}] {args[0]}")

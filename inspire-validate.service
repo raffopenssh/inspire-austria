@@ -1,0 +1,11 @@
+[Unit]
+Description=INSPIRE Austria Link Validation Job
+After=network.target
+
+[Service]
+Type=oneshot
+User=exedev
+WorkingDirectory=/home/exedev/inspire-austria
+ExecStart=/usr/bin/python3 /home/exedev/inspire-austria/validate_links.py --limit 1000
+StandardOutput=journal
+StandardError=journal
