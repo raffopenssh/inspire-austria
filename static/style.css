@@ -186,13 +186,21 @@ h1 {
 
 .gem-badge {
     display: inline-block;
-    background: var(--gem);
+    background: var(--accent);
     color: white;
-    padding: 0.15rem 0.4rem;
+    padding: 0.2rem 0.5rem;
     border-radius: 3px;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 600;
     margin-right: 0.5rem;
+}
+
+/* Panel title */
+.panel-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: var(--text);
 }
 
 /* Selection Bar */
@@ -290,17 +298,31 @@ h1 {
 
 .result-card .favorite-btn {
     position: absolute;
-    top: 1rem;
+    top: 0.75rem;
     right: 2.5rem;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
     color: var(--text-muted);
     cursor: pointer;
-    transition: color 0.15s;
+    transition: all 0.15s;
 }
 
-.result-card .favorite-btn:hover,
-.result-card .favorite-btn.active {
+.result-card .favorite-btn:hover {
+    border-color: var(--warning);
     color: var(--warning);
+}
+
+.result-card .favorite-btn.active {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: white;
 }
 
 .result-card .title {

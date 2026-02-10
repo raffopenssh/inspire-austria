@@ -743,6 +743,14 @@ class InspireHandler(BaseHTTPRequestHandler):
         conn = get_db()
         cur = conn.cursor()
         
+        # Get concept name if we have a concept_id
+        concept_name = None
+        if concept_id:
+            cur.execute('SELECT name_de FROM concepts WHERE id = ?', (concept_id,))
+            name_row = cur.fetchone()
+            if name_row:
+                concept_name = name_row[0]
+        
         if concept_id:
             # Get all datasets for this concept with their schemas
             cur.execute('''
@@ -855,6 +863,7 @@ class InspireHandler(BaseHTTPRequestHandler):
         
         result = {
             'concept': concept_id,
+            'name_de': concept_name,
             'datasets': datasets,
             'analysis': {
                 'total_datasets': len(datasets),

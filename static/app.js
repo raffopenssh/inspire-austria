@@ -136,7 +136,7 @@ function renderCurrentGem() {
     const gem = gemsData[currentGemIndex];
     if (!gem) return;
     
-    const icon = gem.type === 'concept' ? '#' : '*';
+    const icon = gem.type === 'concept' ? '#' : '◆';
     
     container.innerHTML = `
         <div class="gem-card active" data-id="${gem.id}" data-type="${gem.type}">
@@ -226,13 +226,13 @@ function renderResults(results) {
                  data-id="${r.id}" data-index="${idx}">
                 <div class="checkbox"></div>
                 <span class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite('${r.id}', event)" title="Favorit">
-                    ${isFavorite ? '*' : '-'}
+                    ${isFavorite ? '★' : '☆'}
                 </span>
                 <div class="title">
                     <a href="#" onclick="showDetail('${r.id}'); return false;">
                         ${escapeHtml(r.title)}
                     </a>
-                    ${r.gem_score >= 8 ? '<span class="gem-badge">*</span>' : ''}
+                    ${r.gem_score >= 8 ? '<span class="gem-badge">◆</span>' : ''}
                 </div>
                 <div class="abstract">${escapeHtml(r.abstract)}</div>
                 <div class="meta">
@@ -366,7 +366,7 @@ async function showDetail(id) {
     
     content.innerHTML = `
         <h2>${escapeHtml(data.title)}</h2>
-        ${data.gem_score >= 8 ? '<span class="gem-badge">* Hochwertig</span>' : ''}
+        ${data.gem_score >= 8 ? '<span class="gem-badge">◆ Hochwertig</span>' : ''}
         
         <div class="section">
             <h4>Beschreibung</h4>
@@ -560,7 +560,11 @@ async function showCombinationPanel(dataOrConceptId) {
     
     const allProvinces = ['Wien', 'Niederösterreich', 'Oberösterreich', 'Salzburg', 'Tirol', 'Vorarlberg', 'Kärnten', 'Steiermark', 'Burgenland'];
     
+    // Get concept name for title
+    const conceptName = data.name_de || data.concept || 'Datensatz-Kombination';
+    
     content.innerHTML = `
+        <h3 class="panel-title"># ${conceptName}</h3>
         <div class="coverage-bar">
             <strong>Österreich-Abdeckung: ${coveragePct}%</strong>
             <div class="coverage-meter">
