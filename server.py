@@ -130,16 +130,30 @@ class InspireHandler(BaseHTTPRequestHandler):
         cur = conn.cursor()
         
         if q:
-            # FTS search with ranking - use prefix matching for partial words
-            # Remove special chars like "/" that break FTS, add * suffix for prefix matching
+            # FTS search with English-German translation support
             import re
-            clean_q = re.sub(r'[/\\\-]', ' ', q)  # Replace slashes with spaces
-            search_terms = clean_q.strip().split()
-            search_terms = [t for t in search_terms if t and len(t) > 1]  # Filter empty and single chars
             
-            if search_terms:
-                fts_query = ' '.join(f'"{term}"*' for term in search_terms)
-                
+            EN_DE = {
+                'groundwater': 'grundwasser', 'water': 'wasser', 'soil': 'boden',
+                'forest': 'wald', 'elevation': 'höhe', 'flood': 'hochwasser',
+                'protection': 'schutz', 'cadastre': 'kataster', 'address': 'adresse',
+                'building': 'gebäude', 'population': 'bevölkerung', 'nature': 'natur',
+                'climate': 'klima', 'river': 'fluss', 'lake': 'see', 'quality': 'qualität',
+                'agriculture': 'landwirtschaft', 'precipitation': 'niederschlag',
+            }
+            
+            clean_q = re.sub(r'[/\\\-]', ' ', q)
+            terms = [t for t in clean_q.strip().lower().split() if t and len(t) > 1]
+            
+            # Expand with German translations
+            expanded = []
+            for t in terms:
+                expanded.append(t)
+                if t in EN_DE:
+                    expanded.append(EN_DE[t])
+            
+            if expanded:
+                fts_query = ' OR '.join(f'"{t}"*' for t in expanded)
                 sql = '''
                     SELECT d.*, fts.rank
                     FROM datasets d
@@ -148,7 +162,6 @@ class InspireHandler(BaseHTTPRequestHandler):
                 '''
                 params = [fts_query]
             else:
-                # Fallback LIKE search for edge cases
                 sql = '''
                     SELECT d.*, 0 as rank FROM datasets d
                     WHERE LOWER(d.title) LIKE ? OR LOWER(d.abstract) LIKE ?
@@ -250,7 +263,36 @@ class InspireHandler(BaseHTTPRequestHandler):
         keywords = [r[0] for r in cur.fetchall()]
         
         cur.execute('SELECT service_type, url, protocol FROM dataset_services WHERE dataset_id = ?', (ds_id,))
-        services = [{'type': r[0], 'url': r[1], 'protocol': r[2]} for r in cur.fetchall()]
+        services = []
+        for r in cur.fetchall():
+            svc = {'type': r[0], 'url': r[1], 'protocol': r[2]}
+            # Detect download format from URL
+            url_lower = r[1].lower() if r[1] else ''
+            if '.gpkg' in url_lower or 'geopackage' in url_lower:
+                svc['format'] = 'GeoPackage'
+            elif '.zip' in url_lower:
+                svc['format'] = 'ZIP'
+            elif '.geojson' in url_lower or 'geojson' in url_lower:
+                svc['format'] = 'GeoJSON'
+            elif '.gml' in url_lower:
+                svc['format'] = 'GML'
+            elif '.shp' in url_lower or 'shapefile' in url_lower:
+                svc['format'] = 'Shapefile'
+            elif '.csv' in url_lower:
+                svc['format'] = 'CSV'
+            services.append(svc)
+        
+        # Also get service status if available
+        cur.execute('''
+            SELECT service_url, status, sample_fields, last_checked 
+            FROM service_status WHERE dataset_id = ?
+        ''', (ds_id,))
+        status_map = {r[0]: {'status': r[1], 'fields': json.loads(r[2]) if r[2] else None, 'last_checked': r[3]} for r in cur.fetchall()}
+        
+        # Merge status into services
+        for svc in services:
+            if svc['url'] in status_map:
+                svc.update(status_map[svc['url']])
         
         cur.execute('SELECT format FROM dataset_formats WHERE dataset_id = ?', (ds_id,))
         formats = [r[0] for r in cur.fetchall()]
@@ -1112,13 +1154,48 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.send_json({'error': 'No validation results yet'})
     
     def handle_schema(self, query):
-        """Get schema info for a dataset."""
+        """Get schema info for a dataset.
+        
+        Now includes discovered fields from service_status table
+        (populated via feedback and schema inspection).
+        """
+        import json
         dataset_id = query.get('id', [None])[0]
         
         conn = get_db()
         cur = conn.cursor()
         
         if dataset_id:
+            # First check service_status for discovered fields (most reliable)
+            cur.execute('''
+                SELECT service_url, service_type, status, sample_fields, last_checked
+                FROM service_status
+                WHERE dataset_id = ? AND sample_fields IS NOT NULL
+                ORDER BY status = 'working' DESC, last_checked DESC
+            ''', (dataset_id,))
+            
+            discovered = cur.fetchall()
+            if discovered:
+                services = []
+                for url, svc_type, status, fields_json, last_checked in discovered:
+                    fields = json.loads(fields_json) if fields_json else []
+                    services.append({
+                        'service_url': url,
+                        'service_type': svc_type,
+                        'status': status,
+                        'fields': fields,
+                        'last_checked': last_checked,
+                        'source': 'discovered'
+                    })
+                conn.close()
+                self.send_json({
+                    'dataset_id': dataset_id,
+                    'discovered_schemas': services,
+                    'note': 'Fields discovered from actual service responses'
+                })
+                return
+            
+            # Fall back to wfs_feature_types table
             cur.execute('''
                 SELECT ft.type_name, ft.inspire_theme, f.field_name, f.field_type, f.is_geometry
                 FROM wfs_feature_types ft
@@ -1128,7 +1205,18 @@ class InspireHandler(BaseHTTPRequestHandler):
             
             rows = cur.fetchall()
             if not rows:
-                self.send_json({'error': 'No schema found'})
+                # Check if we have any services for this dataset
+                cur.execute('''
+                    SELECT service_type, url FROM dataset_services WHERE dataset_id = ?
+                ''', (dataset_id,))
+                services = cur.fetchall()
+                conn.close()
+                self.send_json({
+                    'error': 'No schema discovered yet',
+                    'dataset_id': dataset_id,
+                    'available_services': [{'type': s[0], 'url': s[1]} for s in services],
+                    'hint': 'Submit schema feedback via POST /api/feedback after fetching data'
+                })
                 return
             
             feature_types = {}
