@@ -49,6 +49,17 @@ class InspireHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
     
+    def do_POST(self):
+        """Handle POST requests (for feedback)."""
+        parsed = urlparse(self.path)
+        path = parsed.path
+        query = parse_qs(parsed.query)
+        
+        if path == '/api/feedback':
+            self.handle_feedback(query)
+        else:
+            self.send_error(404, 'POST not supported for this endpoint')
+    
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -91,6 +102,10 @@ class InspireHandler(BaseHTTPRequestHandler):
             self.handle_autocomplete(query)
         elif path == '/api/browse':
             self.handle_browse()
+        elif path == '/api/feedback':
+            self.handle_feedback(query)
+        elif path == '/api/status':
+            self.handle_status(query)
         elif path == '/api/fields':
             self.handle_fields(query)
         elif path == '/api/combine':
@@ -472,7 +487,26 @@ class InspireHandler(BaseHTTPRequestHandler):
                 'example_workflow': [
                     '1. /api/llm?action=search&q=grundwasser -> find relevant datasets',
                     '2. /api/combine?concept=grundwasser -> get WFS URLs and field mappings',
-                    '3. Load WFS data with OWSLib, harmonize fields, combine with geopandas'
+                    '3. Load WFS data with OWSLib, harmonize fields, combine with geopandas',
+                    '4. POST /api/feedback to report success/issues'
+                ],
+                'feedback': {
+                    'endpoint': 'POST /api/feedback',
+                    'description': 'Report issues or successes with datasets/services. Helps improve the API.',
+                    'example': {
+                        'source': 'your-vm-name',
+                        'category': 'service',
+                        'dataset_id': 'uuid-of-dataset',
+                        'service_url': 'https://...',
+                        'issue_type': 'timeout|not_accessible|empty_response|wrong_schema|success',
+                        'details': {'error_message': '...', 'fields': ['col1', 'col2'], 'response_time_ms': 5000}
+                    }
+                },
+                'known_issues': [
+                    'WFS at gis.lfrz.gv.at often times out - prefer Download URLs or OGC API',
+                    'haleconnect.com WFS may return empty feature lists',
+                    'Large OGC API requests (>1000 features) may fail - use pagination',
+                    'Check /api/status for current service health'
                 ]
             })
         
@@ -743,6 +777,226 @@ class InspireHandler(BaseHTTPRequestHandler):
         
         conn.close()
         self.send_json(result)
+    
+    def handle_feedback(self, query):
+        """Handle feedback from LLM agents and users.
+        
+        POST /api/feedback with JSON body:
+        {
+            "source": "claude-vm-name",  # identifier for the reporter
+            "category": "dataset|service|api|schema|suggestion",
+            "dataset_id": "uuid",  # optional
+            "service_url": "url",  # optional
+            "issue_type": "not_accessible|timeout|wrong_schema|empty_response|success|suggestion",
+            "details": { ... }  # any additional info
+        }
+        
+        GET /api/feedback - list recent feedback
+        GET /api/feedback?dataset_id=UUID - feedback for specific dataset
+        """
+        import json
+        from datetime import datetime
+        
+        if self.command == 'POST':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(content_length).decode('utf-8')
+                data = json.loads(body)
+                
+                conn = get_db()
+                cur = conn.cursor()
+                
+                cur.execute('''
+                    INSERT INTO feedback (source, category, dataset_id, service_url, issue_type, details)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (
+                    data.get('source', 'anonymous'),
+                    data.get('category', 'general'),
+                    data.get('dataset_id'),
+                    data.get('service_url'),
+                    data.get('issue_type'),
+                    json.dumps(data.get('details', {}))
+                ))
+                
+                feedback_id = cur.lastrowid
+                
+                # Process immediately if possible
+                self.process_feedback_async(cur, feedback_id, data)
+                
+                conn.commit()
+                conn.close()
+                
+                self.send_json({
+                    'status': 'received',
+                    'feedback_id': feedback_id,
+                    'message': 'Thank you for the feedback. It will be processed.'
+                })
+            except Exception as e:
+                self.send_json({'error': str(e)}, 400)
+        else:
+            # GET - list feedback
+            conn = get_db()
+            cur = conn.cursor()
+            
+            dataset_id = query.get('dataset_id', [None])[0]
+            
+            if dataset_id:
+                cur.execute('''
+                    SELECT id, timestamp, source, category, issue_type, details, processed
+                    FROM feedback WHERE dataset_id = ?
+                    ORDER BY timestamp DESC LIMIT 50
+                ''', (dataset_id,))
+            else:
+                cur.execute('''
+                    SELECT id, timestamp, source, category, dataset_id, issue_type, details, processed
+                    FROM feedback ORDER BY timestamp DESC LIMIT 100
+                ''')
+            
+            rows = cur.fetchall()
+            conn.close()
+            
+            feedback = []
+            for r in rows:
+                if dataset_id:
+                    feedback.append({
+                        'id': r[0], 'timestamp': r[1], 'source': r[2],
+                        'category': r[3], 'issue_type': r[4],
+                        'details': json.loads(r[5]) if r[5] else {},
+                        'processed': bool(r[6])
+                    })
+                else:
+                    feedback.append({
+                        'id': r[0], 'timestamp': r[1], 'source': r[2],
+                        'category': r[3], 'dataset_id': r[4], 'issue_type': r[5],
+                        'details': json.loads(r[6]) if r[6] else {},
+                        'processed': bool(r[7])
+                    })
+            
+            self.send_json({'feedback': feedback, 'count': len(feedback)})
+    
+    def process_feedback_async(self, cur, feedback_id, data):
+        """Process feedback immediately where possible."""
+        import json
+        from datetime import datetime
+        
+        category = data.get('category')
+        issue_type = data.get('issue_type')
+        
+        # Update service_status table if it's service feedback
+        if category == 'service' and data.get('service_url'):
+            status = 'unknown'
+            if issue_type == 'success':
+                status = 'working'
+            elif issue_type == 'timeout':
+                status = 'timeout'
+            elif issue_type == 'not_accessible':
+                status = 'error'
+            elif issue_type == 'empty_response':
+                status = 'empty'
+            
+            # Upsert service status
+            cur.execute('''
+                INSERT INTO service_status (dataset_id, service_url, service_type, last_checked, status, error_message, check_count, success_count)
+                VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+                ON CONFLICT(service_url) DO UPDATE SET
+                    last_checked = excluded.last_checked,
+                    status = excluded.status,
+                    error_message = excluded.error_message,
+                    check_count = check_count + 1,
+                    success_count = success_count + excluded.success_count
+            ''', (
+                data.get('dataset_id'),
+                data.get('service_url'),
+                data.get('details', {}).get('service_type'),
+                datetime.utcnow().isoformat(),
+                status,
+                data.get('details', {}).get('error_message'),
+                1 if issue_type == 'success' else 0
+            ))
+        
+        # Update schema info if provided
+        if category == 'schema' and data.get('service_url'):
+            fields = data.get('details', {}).get('fields')
+            status = 'working' if issue_type == 'success' else 'unknown'
+            
+            cur.execute('''
+                INSERT INTO service_status (dataset_id, service_url, service_type, last_checked, status, sample_fields, check_count, success_count)
+                VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+                ON CONFLICT(service_url) DO UPDATE SET
+                    last_checked = excluded.last_checked,
+                    status = CASE WHEN excluded.status = 'working' THEN 'working' ELSE service_status.status END,
+                    sample_fields = COALESCE(excluded.sample_fields, service_status.sample_fields),
+                    check_count = check_count + 1,
+                    success_count = success_count + excluded.success_count
+            ''', (
+                data.get('dataset_id'),
+                data.get('service_url'),
+                data.get('details', {}).get('service_type'),
+                datetime.utcnow().isoformat(),
+                status,
+                json.dumps(fields) if fields else None,
+                1 if issue_type == 'success' else 0
+            ))
+        
+        # Mark as processed
+        cur.execute('''
+            UPDATE feedback SET processed = 1, processed_at = ?, resolution = 'auto-processed'
+            WHERE id = ?
+        ''', (datetime.utcnow().isoformat(), feedback_id))
+    
+    def handle_status(self, query):
+        """Get service status information.
+        
+        GET /api/status - overall service health
+        GET /api/status?dataset_id=UUID - status for specific dataset's services
+        """
+        import json
+        
+        conn = get_db()
+        cur = conn.cursor()
+        
+        dataset_id = query.get('dataset_id', [None])[0]
+        
+        if dataset_id:
+            cur.execute('''
+                SELECT service_url, service_type, last_checked, status, 
+                       response_time_ms, sample_fields, error_message,
+                       check_count, success_count
+                FROM service_status WHERE dataset_id = ?
+            ''', (dataset_id,))
+            rows = cur.fetchall()
+            services = [{
+                'url': r[0], 'type': r[1], 'last_checked': r[2], 'status': r[3],
+                'response_time_ms': r[4], 'fields': json.loads(r[5]) if r[5] else None,
+                'error': r[6], 'checks': r[7], 'successes': r[8]
+            } for r in rows]
+            conn.close()
+            self.send_json({'dataset_id': dataset_id, 'services': services})
+        else:
+            # Overall stats
+            cur.execute('SELECT status, COUNT(*) FROM service_status GROUP BY status')
+            status_counts = dict(cur.fetchall())
+            
+            cur.execute('SELECT COUNT(*) FROM service_status WHERE last_checked > datetime("now", "-7 days")')
+            recent_checks = cur.fetchone()[0]
+            
+            cur.execute('''
+                SELECT service_url, status, last_checked, error_message
+                FROM service_status WHERE status != 'working'
+                ORDER BY last_checked DESC LIMIT 20
+            ''')
+            problem_services = [{'url': r[0], 'status': r[1], 'last_checked': r[2], 'error': r[3]} for r in cur.fetchall()]
+            
+            cur.execute('SELECT COUNT(*) FROM feedback WHERE processed = 0')
+            pending_feedback = cur.fetchone()[0]
+            
+            conn.close()
+            self.send_json({
+                'status_counts': status_counts,
+                'recent_checks': recent_checks,
+                'problem_services': problem_services,
+                'pending_feedback': pending_feedback
+            })
     
     def handle_concepts(self, query):
         """Get all concepts with their coverage."""
